@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class Comment extends StatelessWidget {
   final int commentCount;
   final VoidCallback onComment;
+  final double iconSize;
+  final double textSize;
 
   const Comment({
     super.key,
     required this.onComment,
     required this.commentCount,
+    this.iconSize = 24.0,
+    this.textSize = 14.0,
   });
 
   @override
@@ -16,9 +20,10 @@ class Comment extends StatelessWidget {
       IconButton(
         onPressed: onComment,
         icon: const Icon(Icons.comment),
+        iconSize: iconSize,
         tooltip: "Comment",
       ),
-      Text('$commentCount'),
+      Text('$commentCount', style: TextStyle(fontSize: textSize)),
     ]);
   }
 }

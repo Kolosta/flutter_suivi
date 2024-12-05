@@ -11,6 +11,8 @@ class Interactions extends StatelessWidget {
   final VoidCallback onLike;
   final VoidCallback onComment;
   final VoidCallback onShare;
+  final bool isLiked;
+  final bool isComment;
 
   const Interactions({
     super.key,
@@ -20,24 +22,36 @@ class Interactions extends StatelessWidget {
     required this.likeCount,
     required this.commentCount,
     required this.shareCount,
+    required this.isLiked,
+    this.isComment = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final iconSize = isComment ? 20.0 : 24.0;
+    final textSize = isComment ? 12.0 : 14.0;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         Like(
           onLike: onLike,
           likeCount: likeCount,
+          isLiked: isLiked,
+          iconSize: iconSize,
+          textSize: textSize,
         ),
         Comment(
           onComment: onComment,
           commentCount: commentCount,
+          iconSize: iconSize,
+          textSize: textSize,
         ),
         Share(
           onShare: onShare,
           shareCount: shareCount,
+          iconSize: iconSize,
+          textSize: textSize,
         ),
       ],
     );

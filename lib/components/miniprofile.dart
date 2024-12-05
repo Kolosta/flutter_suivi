@@ -12,7 +12,18 @@ class MiniProfile extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 20,
-          backgroundImage: NetworkImage(user.avatar),
+          child: ClipOval(
+            child: FadeInImage(
+              placeholder: const AssetImage('assets/default_avatar.jpg'),
+              image: NetworkImage(user.avatar),
+              imageErrorBuilder: (context, error, stackTrace) {
+                return Image.asset('assets/default_avatar.jpg');
+              },
+              fit: BoxFit.cover,
+              width: 40,
+              height: 40,
+            ),
+          ),
         ),
         const SizedBox(width: 10),
         Text(
