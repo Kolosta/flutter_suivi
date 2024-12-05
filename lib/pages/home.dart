@@ -24,7 +24,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Whooo ! Le TP1'),
       ),
-      backgroundColor: Colors.grey[100], // Set background color to light gray
+      backgroundColor: Colors.white, // Set background color to light gray
       body: Column(
         children: [
           Expanded(
@@ -37,10 +37,16 @@ class HomePage extends StatelessWidget {
                     return Column(
                       children: [
                         Post(post: post),
-                        Container(
+                        (index != postProvider.posts.length - 1)
+                            ? Container(
+                          color: Colors.grey[100],
+                          height: 10,
+                        )
+                            : Container(
                           color: Colors.white,
                           height: 10,
-                        ),
+                          // child: const Divider(color: Colors.grey, height: 0, thickness: 1, indent: 0, endIndent: 0,),
+                        )
                       ],
                     );
                   },
@@ -48,6 +54,7 @@ class HomePage extends StatelessWidget {
               },
             ),
           ),
+          const Divider(color: Colors.grey, height: 0, thickness: 1, indent: 0, endIndent: 0,),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -87,12 +94,13 @@ class HomePage extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    Expanded(
+                   Expanded(
                       child: TextField(
                         controller: contentController,
                         decoration: const InputDecoration(
                           hintText: 'Nouveau post',
-                          border: OutlineInputBorder(),
+                          border: InputBorder.none, // Remove the border
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10), // Add padding to match the app's style
                         ),
                       ),
                     ),
