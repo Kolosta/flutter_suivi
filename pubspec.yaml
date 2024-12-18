@@ -15,10 +15,13 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   provider: ^6.1.2
+  geolocator: ^13.0.2
+  geocoding: ^3.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  http: ^0.13.3
 
   flutter_lints: ^4.0.0
 

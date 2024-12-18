@@ -5,7 +5,14 @@ import 'package:tp1_flutter/providers/post_provider.dart';
 import 'package:tp1_flutter/providers/user_provider.dart';
 import 'package:tp1_flutter/models/post.dart' as models;
 
+import 'package:geolocator/geolocator.dart';
+import 'package:tp1_flutter/services/location_service.dart';
+import 'package:tp1_flutter/services/weather_service.dart';
+
 class HomePage extends StatelessWidget {
+  final LocationService _locationService = LocationService();
+  final WeatherService _weatherService = WeatherService();
+
   @override
   Widget build(BuildContext context) {
     TextEditingController contentController = TextEditingController();
@@ -154,14 +161,22 @@ class HomePage extends StatelessWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.send),
-                      onPressed: () {
+                      onPressed: () async {
                         final currentUser = Provider.of<UserProvider>(context, listen: false).currentUser;
                         if (currentUser != null && contentController.text.isNotEmpty) {
+                          Position position = await _locationService.getCurrentLocation();
+                          String city = await _locationService.getCityFromCoordinates(position);
+                          Map<String, dynamic> weatherData = await _weatherService.fetchWeatherData(city);
+                          double temperature = weatherData['main']['temp'] - 273.15;
+
+
                           Provider.of<PostProvider>(context, listen: false).addPost(
                             models.Post(
                               owner: currentUser,
                               content: contentController.text,
                               image: imageController.text.isNotEmpty ? imageController.text : null,
+                              location: city,
+                              weather: '${temperature.toStringAsFixed(2)}°C',
                             ),
                           );
                           contentController.clear();

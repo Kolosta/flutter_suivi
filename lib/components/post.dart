@@ -28,7 +28,6 @@ class Post extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header (Profile Picture + Username)
           MiniProfile(user: post.owner),
           if (isComment) ...[
             Text(
@@ -38,7 +37,6 @@ class Post extends StatelessWidget {
           ],
           if (post.content != null) ...[
             const SizedBox(height: 10),
-            // Text Content
             Text(
               post.content!,
               style: const TextStyle(fontSize: 14),
@@ -46,7 +44,6 @@ class Post extends StatelessWidget {
           ],
           if (post.image != null) ...[
             const SizedBox(height: 10),
-            // Optional Post Image
             GestureDetector(
               onTap: () => _showFullScreenImage(context, post.image!),
               child: AspectRatio(
@@ -64,13 +61,22 @@ class Post extends StatelessWidget {
               ),
             ),
           ],
-          // Shared Post
+          if (post.location != null && post.weather != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              'Location: ${post.location}',
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            Text(
+              'Weather: ${post.weather}',
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ],
           if (post.embededPost != null) ...[
             const SizedBox(height: 10),
             SharedPost(post: post.embededPost!),
           ],
           const SizedBox(height: 10),
-          // Action Buttons (Like, Share, Comment)
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
