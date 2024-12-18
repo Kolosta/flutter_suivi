@@ -1,50 +1,48 @@
+import 'package:tp1_flutter/src/app.dart';
+import 'package:tp1_flutter/src/configs/adapter/adapter_conf.dart';
+import 'package:tp1_flutter/src/configs/injector/injector_conf.dart';
+import 'package:tp1_flutter/src/core/constants/list_translation_locale.dart';
+import 'package:tp1_flutter/src/core/utils/observer.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tp1_flutter/models/post.dart';
-import 'package:tp1_flutter/models/user.dart';
-import 'package:tp1_flutter/pages/home.dart';
-import 'package:tp1_flutter/providers/post_provider.dart';
-import 'package:tp1_flutter/providers/user_provider.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
-void main() {
+import 'firebase_options.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await Hive.initFlutter();
+
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: kIsWeb
+        ? HydratedStorage.webStorageDirectory
+        : await getTemporaryDirectory(),
+  );
+
+
+  configureAdapter();
+
+  configureDependencies();
+
+  Bloc.observer = AppBlocObserver();
+
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => PostProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-      ],
-      child: MyApp(),
+    EasyLocalization(
+      supportedLocales: const [frenchLocale, englishLocale],
+      path: "assets/translations",
+      startLocale: frenchLocale,
+      child: const MyApp(), //src/app.dart
     ),
   );
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    //TODO : faire un systeme de login pour supprimer ça
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<UserProvider>(context, listen: false).setCurrentUser(
-        // User(username: 'current_user', avatar: 'https://encrypted-tbn0SIrx3nVQ&s'), //Case where the image is not found, bad url
-        // User(username: 'current_user', avatar: ''), //Case where the image is not found, empty url
-        User(username: 'current_user', avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyIxAp9lLLNt0nSzzs2uCR6w_6N4SIrx3nVQ&s'), //Case where the image is found
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Fundamentals',
-      home: Scaffold(
-        body: HomePage(),
-      ),
-    );
-  }
-}
