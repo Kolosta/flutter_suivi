@@ -12,6 +12,7 @@ import 'package:tp1_flutter/services/weather_service.dart';
 class HomePage extends StatelessWidget {
   final LocationService _locationService = LocationService();
   final WeatherService _weatherService = WeatherService();
+  final ValueNotifier<bool> _isLoading = ValueNotifier<bool>(false);
 
   @override
   Widget build(BuildContext context) {
@@ -159,30 +160,48 @@ class HomePage extends StatelessWidget {
                         );
                       },
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: () async {
-                        final currentUser = Provider.of<UserProvider>(context, listen: false).currentUser;
-                        if (currentUser != null && contentController.text.isNotEmpty) {
-                          Position position = await _locationService.getCurrentLocation();
-                          String city = await _locationService.getCityFromCoordinates(position);
-                          Map<String, dynamic> weatherData = await _weatherService.fetchWeatherData(city);
-                          double temperature = weatherData['main']['temp'] - 273.15;
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _isLoading,
+                      builder: (context, isLoading, child){
+                        return isLoading
+                          ? const CircularProgressIndicator()
+                          : IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: () async {
+                              final currentUser = Provider.of<UserProvider>(context, listen: false).currentUser;
+                              if (currentUser != null && contentController.text.isNotEmpty) {
+                                _isLoading.value = true;
+                                try {
+                                  Position position = await _locationService.getCurrentLocation();
+                                  String city = await _locationService.getCityFromCoordinates(position);
+                                  Map<String, dynamic> weatherData = await _weatherService.fetchWeatherData(city);
+                                  double temperature = weatherData['main']['temp'] - 273.15;
 
 
-                          Provider.of<PostProvider>(context, listen: false).addPost(
-                            models.Post(
-                              owner: currentUser,
-                              content: contentController.text,
-                              image: imageController.text.isNotEmpty ? imageController.text : null,
-                              location: city,
-                              weather: '${temperature.toStringAsFixed(2)}°C',
-                            ),
+                                  Provider.of<PostProvider>(context, listen: false).addPost(
+                                    models.Post(
+                                      owner: currentUser,
+                                      content: contentController.text,
+                                      image: imageController.text.isNotEmpty ? imageController.text : null,
+                                      location: city,
+                                      weather: '${temperature.toStringAsFixed(2)}°C',
+                                    ),
+                                  );
+                                  contentController.clear();
+                                  imageController.clear();
+                                  imageUrlNotifier.value = null;
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Impossible de récupérer la météo. RIP'),
+                                    ),
+                                  );
+                                } finally {
+                                  _isLoading.value = false;
+                                }
+                              }
+                            },
                           );
-                          contentController.clear();
-                          imageController.clear();
-                          imageUrlNotifier.value = null;
-                        }
                       },
                     ),
                   ],

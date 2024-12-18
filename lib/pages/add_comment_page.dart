@@ -3,9 +3,15 @@ import 'package:provider/provider.dart';
 import 'package:tp1_flutter/models/post.dart' as models;
 import 'package:tp1_flutter/providers/post_provider.dart';
 import 'package:tp1_flutter/providers/user_provider.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:tp1_flutter/services/location_service.dart';
+import 'package:tp1_flutter/services/weather_service.dart';
 
 class AddCommentPage extends StatelessWidget {
   final models.Post post;
+  final LocationService _locationService = LocationService();
+  final WeatherService _weatherService = WeatherService();
+  final ValueNotifier<bool> _isLoading = ValueNotifier<bool>(false);
 
   AddCommentPage({required this.post});
 
@@ -28,7 +34,7 @@ class AddCommentPage extends StatelessWidget {
             Navigator.of(context).pop();
           },
         ),
-        toolbarHeight: 50.0, // Réduire la hauteur de l'AppBar
+        toolbarHeight: 50.0,
       ),
       backgroundColor: Colors.white,
       body: Padding(
@@ -79,7 +85,7 @@ class AddCommentPage extends StatelessWidget {
                               height: 60,
                               alignment: Alignment.centerLeft,
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8), // Small rounded corners on the image
+                                borderRadius: BorderRadius.circular(8),
                                 child: Image.network(
                                   imageUrl,
                                   fit: BoxFit.contain,
@@ -98,7 +104,6 @@ class AddCommentPage extends StatelessWidget {
                     : Container();
               },
             ),
-            //Ligne grise en dessous
             const Divider(color: Colors.grey, height: 0, thickness: 1, indent: 0, endIndent: 0,),
           ],
         ),
@@ -106,31 +111,30 @@ class AddCommentPage extends StatelessWidget {
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         child: SizedBox(
-          height: 50.0, // Réduire la hauteur de la BottomAppBar
+          height: 50.0,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
                 icon: const Icon(Icons.image),
                 onPressed: () {
-                  // Logic to add image URL
                   showDialog(
                     context: context,
                     builder: (context) {
                       return AlertDialog(
                         backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8), // Moins d'arrondis sur les angles
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         title: const Text(
                           'Ajouter une URL d\'image',
-                          style: TextStyle(color: Colors.black), // Suivre le thème du reste de l'appli
+                          style: TextStyle(color: Colors.black),
                         ),
                         content: TextField(
                           controller: imageController,
                           decoration: const InputDecoration(
                             hintText: 'Entrez l\'URL de l\'image',
-                            hintStyle: TextStyle(color: Colors.grey), // Suivre le thème du reste de l'appli
+                            hintStyle: TextStyle(color: Colors.grey),
                           ),
                         ),
                         actions: [
@@ -140,7 +144,7 @@ class AddCommentPage extends StatelessWidget {
                             },
                             child: const Text(
                               'Annuler',
-                              style: TextStyle(color: Colors.blue), // Suivre le thème du reste de l'appli
+                              style: TextStyle(color: Colors.blue),
                             ),
                           ),
                           TextButton(
@@ -150,7 +154,7 @@ class AddCommentPage extends StatelessWidget {
                             },
                             child: const Text(
                               'Ajouter',
-                              style: TextStyle(color: Colors.blue), // Suivre le thème du reste de l'appli
+                              style: TextStyle(color: Colors.blue),
                             ),
                           ),
                         ],
@@ -159,20 +163,45 @@ class AddCommentPage extends StatelessWidget {
                   );
                 },
               ),
-              IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: () {
-                  if (commentController.text.isNotEmpty) {
-                    postProvider.addComment(
-                      post,
-                      models.Post(
-                        owner: currentUser!,
-                        content: commentController.text,
-                        image: imageController.text.isNotEmpty ? imageController.text : null,
-                      ),
-                    );
-                    Navigator.of(context).pop();
-                  }
+              ValueListenableBuilder<bool>(
+                valueListenable: _isLoading,
+                builder: (context, isLoading, child) {
+                  return isLoading
+                      ? const CircularProgressIndicator()
+                      : IconButton(
+                          icon: const Icon(Icons.send),
+                          onPressed: () async {
+                            if (commentController.text.isNotEmpty) {
+                              _isLoading.value = true;
+                              try {
+                                Position position = await _locationService.getCurrentLocation();
+                                String city = await _locationService.getCityFromCoordinates(position);
+                                Map<String, dynamic> weatherData = await _weatherService.fetchWeatherData(city);
+                                double temperature = weatherData['main']['temp'] - 273.15;
+
+                                postProvider.addComment(
+                                  post,
+                                  models.Post(
+                                    owner: currentUser!,
+                                    content: commentController.text,
+                                    image: imageController.text.isNotEmpty ? imageController.text : null,
+                                    location: city,
+                                    weather: '${temperature.toStringAsFixed(2)}°C',
+                                  ),
+                                );
+                                Navigator.of(context).pop();
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Impossible de récupérer la météo. RIP'),
+                                  ),
+                                );
+                              } finally {
+                                _isLoading.value = false;
+                              }
+                            }
+                          },
+                        );
                 },
               ),
             ],
