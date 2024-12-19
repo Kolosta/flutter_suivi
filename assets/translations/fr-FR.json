@@ -49,5 +49,10 @@
   "no_anime_in_cache": "Aucun animé dans le cache",
   "cache_cleared_successfully": "Cache vidé avec succès",
   "unranked": "Non classé",
-    "discussion_thread": "Fil des publications"
+  "discussion_thread": "Fil des publications",
+  "delete": "Supprimer",
+  "cancel": "Annuler",
+  "delete_comment": "Supprimer le commentaire",
+  "confirm_comment_deletion": "Êtes-vous sûr de vouloir supprimer ce commentaire?"
+
 }

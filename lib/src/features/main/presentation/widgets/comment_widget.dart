@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../configs/injector/injector_conf.dart';
@@ -11,17 +12,50 @@ import 'post_images_widget.dart';
 class CommentWidget extends StatelessWidget {
   final PostEntity comment;
   final String userId;
+  final PostBloc postBloc;
 
-  const CommentWidget({super.key, required this.comment, required this.userId});
+  const CommentWidget({super.key, required this.comment, required this.userId, required this.postBloc});
 
   void _openAddCommentPage(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => BlocProvider.value(
           value: getIt<PostBloc>(),
-          child: WriteCommentPage(user: UserEntity(userId: userId), post: comment),
+          child: WriteCommentPage(user: UserEntity(userId: userId), post: comment, postBloc: postBloc,),
         ),
       ),
+    );
+  }
+
+  void _confirmDeletion(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("delete_comment".tr()),
+          content: Text('confirm_comment_deletion'.tr()),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('cancel'.tr()),
+            ),
+            TextButton(
+              onPressed: () {
+                final deletePostModel = DeletePostModel(id: comment.id, isComment: comment.isComment);
+                // context.read<PostBloc>().add(DeletePostEvent(deletePostModel));
+                postBloc.add(DeletePostEvent(deletePostModel));
+                Navigator.of(context).pop();
+                if(!comment.isComment) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text('delete'.tr()),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -61,7 +95,8 @@ class CommentWidget extends StatelessWidget {
                       size: 16.0,
                     ),
                     onPressed: () {
-                      context.read<PostBloc>().add(ToggleLikeEvent(comment, userId));
+                      // context.read<PostBloc>().add(ToggleLikeEvent(comment, userId));
+                      postBloc.add(ToggleLikeEvent(comment, userId));
                     },
                   ),
                   const SizedBox(width: 4.0),
@@ -70,8 +105,9 @@ class CommentWidget extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.delete, size: 16.0),
                     onPressed: () {
-                      final deletePostModel = DeletePostModel(id: comment.id, isComment: comment.isComment);
-                      context.read<PostBloc>().add(DeletePostEvent(deletePostModel));
+                      // final deletePostModel = DeletePostModel(id: comment.id, isComment: comment.isComment);
+                      // context.read<PostBloc>().add(DeletePostEvent(deletePostModel));
+                      _confirmDeletion(context);
                     },
                   ),
                   IconButton(

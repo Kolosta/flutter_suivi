@@ -10,8 +10,9 @@ import '../bloc/post_bloc.dart';
 
 class WritePostPage extends StatefulWidget {
   final UserEntity user;
+  final PostBloc postBloc;
 
-  const WritePostPage({super.key, required this.user});
+  const WritePostPage({super.key, required this.user, required this.postBloc});
 
   @override
   _WritePostPageState createState() => _WritePostPageState();
@@ -133,7 +134,8 @@ class _WritePostPageState extends State<WritePostPage> {
                   likes: const [],
                   commentIds: const [],
                 );
-                context.read<PostBloc>().add(AddPostEvent(newPost));
+                // context.read<PostBloc>().add(AddPostEvent(newPost));
+                widget.postBloc.add(AddPostEvent(newPost));
                 Navigator.of(context).pop();
               },
             ),

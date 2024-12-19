@@ -10,8 +10,9 @@ import 'post_images_widget.dart';
 class PostWidget extends StatelessWidget {
   final PostEntity post;
   final String userId;
+  final PostBloc postBloc;
 
-  const PostWidget({super.key, required this.post, required this.userId});
+  const PostWidget({super.key, required this.post, required this.userId, required this.postBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -23,60 +24,68 @@ class PostWidget extends StatelessWidget {
           );
         }
       },
-      child: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 0),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (!post.isComment)
-                PostImagesWidget(
-                  imagePaths: post.imagePaths ?? [],
-                  imageUrls: post.imageUrls ?? [],
-                ),
-              const SizedBox(height: 8.0),
-              Text(
-                post.content ?? '',
-                style: const TextStyle(fontSize: 16.0),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CommentsPage(
+                post: post,
+                userId: userId,
+                postBloc: postBloc,
+                // postBloc: postBloc,
               ),
-              const SizedBox(height: 8.0),
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      (post.likes?.contains(userId) ?? false) ? Icons.thumb_up : Icons.thumb_up_outlined,
-                      size: 16.0,
-                    ),
-                    onPressed: () {
-                      context.read<PostBloc>().add(ToggleLikeEvent(post, userId));
-                    },
+            ),
+          );
+        },
+        child: Container(
+          color: Colors.white,
+          padding: const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!post.isComment)
+                  PostImagesWidget(
+                    imagePaths: post.imagePaths ?? [],
+                    imageUrls: post.imageUrls ?? [],
                   ),
-                  const SizedBox(width: 4.0),
-                  Text('${post.likes?.length ?? 0}'),
-                  if (!post.isComment) ...[
-                    const SizedBox(width: 16.0),
+                const SizedBox(height: 8.0),
+                Text(
+                  post.content ?? '',
+                  style: const TextStyle(fontSize: 16.0),
+                ),
+                const SizedBox(height: 8.0),
+                Row(
+                  children: [
                     IconButton(
-                      icon: const Icon(Icons.comment, size: 16.0),
+                      icon: Icon(
+                        (post.likes?.contains(userId) ?? false) ? Icons.thumb_up : Icons.thumb_up_outlined,
+                        size: 16.0,
+                      ),
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CommentsPage(
-                              post: post,
-                              userId: userId,
-                            ),
-                          ),
-                        );
+                        // context.read<PostBloc>().add(ToggleLikeEvent(post, userId));
+                        postBloc.add(ToggleLikeEvent(post, userId));
                       },
                     ),
                     const SizedBox(width: 4.0),
-                    Text('${post.commentIds?.length ?? 0}'),
+                    Text('${post.likes?.length ?? 0}'),
+                    if (!post.isComment) ...[
+                      const SizedBox(width: 16.0),
+                      IconButton(
+                        icon: const Icon(Icons.comment, size: 16.0),
+                        onPressed: () {
+                          // Do nothing here
+                        },
+                      ),
+                      const SizedBox(width: 4.0),
+                      Text('${post.commentIds?.length ?? 0}'),
+                    ],
                   ],
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

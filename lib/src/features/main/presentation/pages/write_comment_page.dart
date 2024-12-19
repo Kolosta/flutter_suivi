@@ -11,8 +11,9 @@ import '../bloc/post_bloc.dart';
 class WriteCommentPage extends StatefulWidget {
   final UserEntity user;
   final PostEntity post;
+  final PostBloc postBloc;
 
-  const WriteCommentPage({super.key, required this.user, required this.post});
+  const WriteCommentPage({super.key, required this.user, required this.post, required this.postBloc});
 
   @override
   _WriteCommentPageState createState() => _WriteCommentPageState();
@@ -138,7 +139,8 @@ class _WriteCommentPageState extends State<WriteCommentPage> {
                   likes: const [],
                   commentIds: const [],
                 );
-                context.read<PostBloc>().add(AddCommentEvent(widget.post, newComment));
+                // context.read<PostBloc>().add(AddCommentEvent(widget.post, newComment));
+                widget.postBloc.add(AddCommentEvent(widget.post, newComment));
                 Navigator.of(context).pop();
               },
             ),

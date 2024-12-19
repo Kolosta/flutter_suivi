@@ -61,17 +61,17 @@ class AppRouteConf {
           return MainPage(user: user);
         },
       ),
-      GoRoute(
-        path: AppRoute.commentsPage.path,
-        name: AppRoute.commentsPage.name,
-        builder: (_, state) {
-          final params = state.pathParameters;
-          final post = state.extra as PostEntity;
-          final userId = params["user_id"] ?? "";
-
-          return CommentsPage(post: post, userId: userId);
-        },
-      ),
+      // GoRoute(
+      //   path: AppRoute.commentsPage.path,
+      //   name: AppRoute.commentsPage.name,
+      //   builder: (_, state) {
+      //     final params = state.pathParameters;
+      //     final post = state.extra as PostEntity;
+      //     final userId = params["user_id"] ?? "";
+      //
+      //     return CommentsPage(post: post, userId: userId, postBloc: getIt<PostBloc>());
+      //   },
+      // ),
       GoRoute(
         path: AppRoute.params.path,
         name: AppRoute.params.name,

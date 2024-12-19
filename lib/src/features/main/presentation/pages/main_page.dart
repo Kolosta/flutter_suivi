@@ -36,7 +36,7 @@ class _MainPageState extends State<MainPage> {
       MaterialPageRoute(
         builder: (context) => BlocProvider.value(
           value: _postBloc,
-          child: WritePostPage(user: widget.user),
+          child: WritePostPage(user: widget.user, postBloc: _postBloc,),
         ),
       ),
     );
@@ -96,7 +96,8 @@ class _MainPageState extends State<MainPage> {
                     margin: const EdgeInsets.only(bottom: 4.0),
                     child: PostWidget(
                       post: post,
-                      userId: widget.user.userId!
+                      userId: widget.user.userId!,
+                      postBloc: _postBloc,
                     )
                   );
                 },
