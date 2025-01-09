@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tp1_flutter/src/features/auth/domain/entities/user_entity.dart';
+import 'package:tp1_flutter/src/features/main/presentation/bloc/detail/detail_bloc.dart';
 
 import '../../domain/entities/post_entity.dart';
-import '../bloc/post_bloc.dart';
+import '../bloc/main/post_bloc.dart';
 
 class WriteCommentPage extends StatefulWidget {
   final UserEntity user;
   final PostEntity post;
-  final PostBloc postBloc;
+  final PostDetailBloc postDetailBloc;
 
-  const WriteCommentPage({super.key, required this.user, required this.post, required this.postBloc});
+  const WriteCommentPage({super.key, required this.user, required this.post, required this.postDetailBloc});
 
   @override
   _WriteCommentPageState createState() => _WriteCommentPageState();
@@ -140,7 +141,7 @@ class _WriteCommentPageState extends State<WriteCommentPage> {
                   commentIds: const [],
                 );
                 // context.read<PostBloc>().add(AddCommentEvent(widget.post, newComment));
-                widget.postBloc.add(AddCommentEvent(widget.post, newComment));
+                widget.postDetailBloc.add(AddCommentEvent(widget.post, newComment));
                 Navigator.of(context).pop();
               },
             ),

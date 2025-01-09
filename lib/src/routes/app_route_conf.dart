@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 // import '../features/main/presentation/pages/main_page.dart';
 import '../features/main/domain/entities/post_entity.dart';
-import '../features/main/presentation/pages/comments_page.dart';
+import '../features/main/presentation/pages/post_detail_page.dart';
 import '../features/main/presentation/pages/main_page.dart';
 import '../features/params/presentation/pages/params_page.dart';
 import 'app_route_path.dart';

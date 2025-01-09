@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:tp1_flutter/src/features/auth/domain/entities/user_entity.dart';
 
 import '../../domain/entities/post_entity.dart';
-import '../bloc/post_bloc.dart';
+import '../bloc/main/post_bloc.dart';
 
 class WritePostPage extends StatefulWidget {
   final UserEntity user;

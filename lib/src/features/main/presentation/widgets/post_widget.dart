@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../configs/injector/injector_conf.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../domain/entities/post_entity.dart';
-import '../bloc/post_bloc.dart';
-import '../pages/comments_page.dart';
+import '../bloc/main/post_bloc.dart';
+import '../pages/post_detail_page.dart';
 import 'post_images_widget.dart';
 
 class PostWidget extends StatelessWidget {
@@ -29,10 +29,10 @@ class PostWidget extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => CommentsPage(
+              builder: (context) => PostDetailPage(
                 post: post,
                 userId: userId,
-                postBloc: postBloc,
+                // postBloc: postBloc,
                 // postBloc: postBloc,
               ),
             ),

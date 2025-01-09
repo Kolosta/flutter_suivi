@@ -7,7 +7,7 @@ import 'package:tp1_flutter/src/features/main/presentation/pages/write_post_page
 import '../../../../configs/injector/injector_conf.dart';
 import '../../../../routes/app_route_path.dart';
 import '../../../auth/domain/entities/user_entity.dart';
-import '../bloc/post_bloc.dart';
+import '../bloc/main/post_bloc.dart';
 import '../widgets/post_widget.dart';
 
 class MainPage extends StatefulWidget {

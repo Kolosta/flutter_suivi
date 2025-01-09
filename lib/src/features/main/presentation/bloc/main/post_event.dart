@@ -60,12 +60,30 @@ class GetCommentsEvent extends PostEvent {
   List<Object> get props => [postId];
 }
 
-class AddCommentEvent extends PostEvent {
-  final PostEntity post;
-  final PostEntity comment;
+// class AddCommentEvent extends PostEvent {
+//   final PostEntity post;
+//   final PostEntity comment;
+//
+//   const AddCommentEvent(this.post, this.comment);
+//
+//   @override
+//   List<Object> get props => [post, comment];
+// }
 
-  const AddCommentEvent(this.post, this.comment);
+class SetActivePostEvent extends PostEvent {
+  final PostEntity post;
+
+  const SetActivePostEvent(this.post);
 
   @override
-  List<Object> get props => [post, comment];
+  List<Object> get props => [post];
+}
+
+class LoadCommentsEvent extends PostEvent {
+  final String postId;
+
+  const LoadCommentsEvent(this.postId);
+
+  @override
+  List<Object> get props => [postId];
 }

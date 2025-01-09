@@ -2,7 +2,7 @@ import 'package:tp1_flutter/src/configs/injector/injector.dart';
 import 'package:tp1_flutter/src/features/main/domain/usecases/delete_post_usecase.dart';
 import 'package:tp1_flutter/src/features/main/domain/usecases/get_posts_usecase.dart';
 import 'package:tp1_flutter/src/features/main/domain/usecases/toggle_like_usecase.dart';
-import 'package:tp1_flutter/src/features/main/presentation/bloc/post_bloc.dart';
+import 'package:tp1_flutter/src/features/main/presentation/bloc/main/post_bloc.dart';
 
 import '../../../configs/injector/injector_conf.dart';
 import '../data/datasources/post_remote_data_source.dart';
@@ -11,6 +11,7 @@ import '../domain/usecases/add_comment_usecase.dart';
 import '../domain/usecases/add_post_usecase.dart';
 import '../domain/usecases/get_comments_usecase.dart';
 import '../domain/usecases/get_posts_by_ids_usecase.dart';
+import '../presentation/bloc/detail/detail_bloc.dart';
 
 class PostDependency{
   PostDependency._();
@@ -26,6 +27,14 @@ class PostDependency{
           getIt<ToggleLikeUsecase>(),
           getIt<GetCommentsUseCase>(),
           getIt<AddCommentUseCase>(),
+      ),
+    );
+    getIt.registerFactory(
+      () => PostDetailBloc(
+          getIt<GetCommentsUseCase>(),
+          getIt<ToggleLikeUsecase>(),
+          getIt<AddCommentUseCase>(),
+          getIt<DeletePostUseCase>(),
       ),
     );
 
@@ -65,6 +74,8 @@ class PostDependency{
           getIt<PostRepositoryImpl>(),
       ),
     );
+
+
 
 
     // Repository

@@ -2,18 +2,18 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tp1_flutter/src/features/main/domain/usecases/get_comments_usecase.dart';
 
-import '../../../../core/usecases/usecase.dart';
-import '../../../../core/utils/failure_converter.dart';
-import '../../../../core/utils/logger.dart';
-import '../../data/models/delete_post_model.dart';
-import '../../data/models/toggle_like_model.dart';
-import '../../domain/entities/post_entity.dart';
-import '../../domain/usecases/add_comment_usecase.dart';
-import '../../domain/usecases/add_post_usecase.dart';
-import '../../domain/usecases/delete_post_usecase.dart';
-import '../../domain/usecases/get_posts_by_ids_usecase.dart';
-import '../../domain/usecases/get_posts_usecase.dart';
-import '../../domain/usecases/toggle_like_usecase.dart';
+import '../../../../../core/usecases/usecase.dart';
+import '../../../../../core/utils/failure_converter.dart';
+import '../../../../../core/utils/logger.dart';
+import '../../../data/models/delete_post_model.dart';
+import '../../../data/models/toggle_like_model.dart';
+import '../../../domain/entities/post_entity.dart';
+import '../../../domain/usecases/add_comment_usecase.dart';
+import '../../../domain/usecases/add_post_usecase.dart';
+import '../../../domain/usecases/delete_post_usecase.dart';
+import '../../../domain/usecases/get_posts_by_ids_usecase.dart';
+import '../../../domain/usecases/get_posts_usecase.dart';
+import '../../../domain/usecases/toggle_like_usecase.dart';
 
 part 'post_event.dart';
 part 'post_state.dart';
@@ -43,7 +43,9 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<DeletePostEvent>(_deletePost);
     on<ToggleLikeEvent>(_toggleLike);
     on<GetCommentsEvent>(_getComments);
-    on<AddCommentEvent>(_addComment);
+    // on<AddCommentEvent>(_addComment);
+    on<SetActivePostEvent>(_setActivePost);
+    on<LoadCommentsEvent>(_loadComments);
   }
 
   @override
@@ -159,18 +161,19 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   }
 
 
-  Future<void> _addComment(AddCommentEvent event, Emitter<PostState> emit) async {
-    final currentState = state;
-    logger.i("_addComment called. State : $currentState");
-    emit(PostLoadingState());
-
-
-    final result = await addCommentUseCase.call(AddCommentParams(event.post.id, event.comment));
-
-    result.fold(
-          (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
-          (_) => add(GetCommentsEvent(event.post.id)), // Recharger les commentaires
-    );
+  // Future<void> _addComment(AddCommentEvent event, Emitter<PostState> emit) async {
+  //   final currentState = state;
+  //   logger.i("_addComment called. State : $currentState");
+  //   emit(PostLoadingState());
+  //
+  //
+  //   final result = await addCommentUseCase.call(AddCommentParams(event.post.id, event.comment));
+  //
+  //   result.fold(
+  //         (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
+  //         (_) => add(GetCommentsEvent(event.post.id)), // Recharger les commentaires
+  //   );
+  // }
     // final currentState = state;
     // if (currentState is PostSuccessState) {
     //   // Émettre l'état de chargement
@@ -194,7 +197,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     //     },
     //   );
     // }
-  }
   // Future<void> _addComment(AddCommentEvent event, Emitter<PostState> emit) async {
   //   // Check if the current state is PostSuccessState
   //   final currentState = state;
@@ -264,4 +266,22 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         }
     );
   }
+
+
+  Future<void> _setActivePost(SetActivePostEvent event, Emitter<PostState> emit) async {
+    emit(PostActiveState(event.post, []));
+    add(LoadCommentsEvent(event.post.id));
+  }
+
+  Future<void> _loadComments(LoadCommentsEvent event, Emitter<PostState> emit) async {
+    if (state is PostActiveState) {
+      final result = await getCommentsUseCase.call(event.postId);
+
+      result.fold(
+            (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
+            (comments) => emit(PostActiveState((state as PostActiveState).activePost, comments)),
+      );
+    }
+  }
+
 }

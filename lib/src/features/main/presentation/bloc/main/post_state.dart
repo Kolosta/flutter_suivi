@@ -28,3 +28,13 @@ class PostFailureState extends PostState {
   @override
   List<Object> get props => [message];
 }
+
+class PostActiveState extends PostState {
+  final PostEntity activePost;
+  final List<PostEntity> comments;
+
+  const PostActiveState(this.activePost, this.comments);
+
+  @override
+  List<Object> get props => [activePost, comments];
+}
