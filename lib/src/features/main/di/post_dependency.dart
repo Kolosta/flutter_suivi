@@ -27,6 +27,7 @@ class PostDependency{
           getIt<ToggleLikeUsecase>(),
           getIt<GetCommentsUseCase>(),
           getIt<AddCommentUseCase>(),
+          // getIt<RemovePostCommentIdEvent>(),
       ),
     );
     getIt.registerFactory(
@@ -35,6 +36,7 @@ class PostDependency{
           getIt<ToggleLikeUsecase>(),
           getIt<AddCommentUseCase>(),
           getIt<DeletePostUseCase>(),
+          getIt<PostBloc>(),
       ),
     );
 

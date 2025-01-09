@@ -87,3 +87,23 @@ class LoadCommentsEvent extends PostEvent {
   @override
   List<Object> get props => [postId];
 }
+
+class UpdatePostCommentCountEvent extends PostEvent {
+  final String postToUpdateId;
+  final String postAddedId;
+
+  const UpdatePostCommentCountEvent(this.postToUpdateId, this.postAddedId);
+
+  @override
+  List<Object> get props => [postToUpdateId, postAddedId];
+}
+
+class RemovePostCommentIdEvent extends PostEvent {
+  final String postToUpdateId;
+  final String commentIdToRemove;
+
+  const RemovePostCommentIdEvent(this.postToUpdateId, this.commentIdToRemove);
+
+  @override
+  List<Object> get props => [postToUpdateId, commentIdToRemove];
+}

@@ -43,9 +43,10 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<DeletePostEvent>(_deletePost);
     on<ToggleLikeEvent>(_toggleLike);
     on<GetCommentsEvent>(_getComments);
-    // on<AddCommentEvent>(_addComment);
     on<SetActivePostEvent>(_setActivePost);
     on<LoadCommentsEvent>(_loadComments);
+    on<UpdatePostCommentCountEvent>(_updatePostCommentCount);
+    on<RemovePostCommentIdEvent>(_removePostCommentId);
   }
 
   @override
@@ -77,16 +78,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     );
   }
 
-  // Future<void> _addPost(AddPostEvent event, Emitter<PostState> emit) async {
-  //   emit(PostLoadingState());
-  //
-  //   final result = await addPostUseCase.call(event.post);
-  //
-  //   result.fold(
-  //         (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
-  //         (_) => add(const GetPostsEvent()),
-  //   );
-  // }
   Future<void> _addPost(AddPostEvent event, Emitter<PostState> emit) async {
     final currentState = state;
     logger.i("_addPost called. State : $currentState");
@@ -115,16 +106,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
-  // Future<void> _deletePost(DeletePostEvent event, Emitter<PostState> emit) async {
-  //   emit(PostLoadingState());
-  //
-  //   final result = await deletePostUseCase.call(event.postModel);
-  //
-  //   result.fold(
-  //         (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
-  //         (_) => add(const GetPostsEvent()),
-  //   );
-  // }
+
   Future<void> _deletePost(DeletePostEvent event, Emitter<PostState> emit) async {
     // Émettre une mise à jour optimiste
     final currentState = state;
@@ -159,75 +141,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
           (comments) => emit(PostSuccessState(comments)),
     );
   }
-
-
-  // Future<void> _addComment(AddCommentEvent event, Emitter<PostState> emit) async {
-  //   final currentState = state;
-  //   logger.i("_addComment called. State : $currentState");
-  //   emit(PostLoadingState());
-  //
-  //
-  //   final result = await addCommentUseCase.call(AddCommentParams(event.post.id, event.comment));
-  //
-  //   result.fold(
-  //         (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
-  //         (_) => add(GetCommentsEvent(event.post.id)), // Recharger les commentaires
-  //   );
-  // }
-    // final currentState = state;
-    // if (currentState is PostSuccessState) {
-    //   // Émettre l'état de chargement
-    //   emit(PostLoadingState());
-    //
-    //   // Ajouter le post de manière optimiste
-    //   final updatedPosts = List<PostEntity>.from(currentState.data)..add(event.post);
-    //   emit(PostSuccessState(updatedPosts));
-    //
-    //   // Ajouter le post dans Firebase
-    //   final result = await addPostUseCase.call(event.post);
-    //
-    //   result.fold(
-    //         (failure) {
-    //       // Rétablir l'état précédent en cas d'échec
-    //       emit(PostFailureState(mapFailureToMessage(failure)));
-    //       emit(PostSuccessState(currentState.data));
-    //     },
-    //         (_) {
-    //       // Ne rien faire, la mise à jour optimiste est déjà appliquée
-    //     },
-    //   );
-    // }
-  // Future<void> _addComment(AddCommentEvent event, Emitter<PostState> emit) async {
-  //   // Check if the current state is PostSuccessState
-  //   final currentState = state;
-  //   if (currentState is PostSuccessState) {
-  //     // Récupérer les commentaires actuels, et ajouter le nouveau commentaire
-  //     final List<PostEntity> updatedComments = List<PostEntity>.from(currentState.data)..add(event.comment);
-  //     emit(PostSuccessState(updatedComments));
-  //
-  //     // Récupérer le post actuel, et ajouter le nouveau commentaire id dans la liste des commentaires ids
-  //     final updatedPost = event.post.copyWith(commentIds: List<String>.from(event.post.commentIds ?? [])..add(event.comment.id));
-  //
-  //     // Émettre l'état de succès avec la liste des commentaires mise à jour
-  //     emit(PostSuccessState(currentState.data.map((post) {
-  //       return post.id == event.post.id ? updatedPost : post;
-  //     }).toList()));
-  //
-  //     // Ajouter le commentaire dans la base de données
-  //     final result = await addCommentUseCase.call(AddCommentParams(event.post.id, event.comment));
-  //
-  //     result.fold(
-  //       (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
-  //       (_) {
-  //         // Recharger les commentaires
-  //         logger.e("GetCommentsEvent emis dans le addComment");
-  //         add(GetCommentsEvent(event.post.id));
-  //       },
-  //     );
-  //   } else {
-  //     logger.e("Mauvais state. State actuel : $currentState");
-  //   }
-  // }
 
 
   Future<void> _toggleLike(ToggleLikeEvent event, Emitter<PostState> emit) async {
@@ -281,6 +194,34 @@ class PostBloc extends Bloc<PostEvent, PostState> {
             (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
             (comments) => emit(PostActiveState((state as PostActiveState).activePost, comments)),
       );
+    }
+  }
+
+  Future<void> _updatePostCommentCount(UpdatePostCommentCountEvent event, Emitter<PostState> emit) async {
+    final currentState = state;
+    emit(PostLoadingState());
+
+    if (currentState is PostSuccessState) {
+      final updatedPosts = currentState.data.map((post) {
+        if (post.id == event.postToUpdateId) {
+          return post.copyWith(commentIds: List<String>.from(post.commentIds ?? [])..add(event.postAddedId));
+        }
+        return post;
+      }).toList();
+      emit(PostSuccessState(updatedPosts));
+    }
+  }
+
+  Future<void> _removePostCommentId(RemovePostCommentIdEvent event, Emitter<PostState> emit) async {
+    final currentState = state;
+    if (currentState is PostSuccessState) {
+      final updatedPosts = currentState.data.map((post) {
+        if (post.id == event.postToUpdateId) {
+          return post.copyWith(commentIds: List<String>.from(post.commentIds ?? [])..remove(event.commentIdToRemove));
+        }
+        return post;
+      }).toList();
+      emit(PostSuccessState(updatedPosts));
     }
   }
 

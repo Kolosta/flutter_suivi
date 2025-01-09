@@ -127,8 +127,11 @@ class _PostDetailPageState extends State<PostDetailPage> {
         ),
         body: BlocBuilder<PostDetailBloc, PostDetailState>(
           builder: (context, state) {
-            if (state is PostDetailLoadingState) {
-              logger.i('PostLoadingState CommentPage');
+            if (state is PostDetailInitialState) {
+              logger.i('PostDetailInitialState CommentPage');
+              return const Center(child: Text('Loading comments...'));
+            } else if (state is PostDetailLoadingState) {
+              logger.i('PostDetailLoadingState CommentPage');
               return const Center(child: CircularProgressIndicator());
             } else if (state is PostDetailSuccessState) {
               logger.i('PostDetailSuccessState CommentPage avec ${state.comments.length} commentaires');

@@ -10,6 +10,7 @@ import '../../../domain/entities/post_entity.dart';
 import '../../../domain/usecases/add_comment_usecase.dart';
 import '../../../domain/usecases/delete_post_usecase.dart';
 import '../../../domain/usecases/toggle_like_usecase.dart';
+import '../main/post_bloc.dart';
 
 part 'detail_event.dart';
 part 'detail_state.dart';
@@ -20,13 +21,15 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
   final ToggleLikeUsecase toggleLikeUsecase;
   final AddCommentUseCase addCommentUseCase;
   final DeletePostUseCase deletePostUseCase;
+  final PostBloc postBloc;
 
   PostDetailBloc(
       this.getCommentsUseCase,
       this.toggleLikeUsecase,
       this.addCommentUseCase,
-      this.deletePostUseCase
-    )
+      this.deletePostUseCase,
+      this.postBloc
+  )
       : super(PostDetailInitialState()) {
     on<LoadPostDetailEvent>(_loadPostDetail);
     on<ToggleLikeOnPostEvent>(_toggleLikeOnPost);
@@ -51,6 +54,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
     if (currentState is PostDetailSuccessState) {
       final updatedPosts = currentState.comments.where((post) => post.id != event.postModel.id).toList();
       emit(PostDetailSuccessState(currentState.activePost, updatedPosts));
+      postBloc.add(RemovePostCommentIdEvent(currentState.activePost.id, event.postModel.id));
     }
 
     final result = await deletePostUseCase.call(event.postModel);
@@ -114,9 +118,19 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
 
     final result = await addCommentUseCase.call(AddCommentParams(event.post.id, event.comment));
 
+    // result.fold(
+    //       (failure) => emit(PostDetailFailureState(mapFailureToMessage(failure))),
+    //       (_) => emit(PostDetailSuccessState(event.post, (state as PostDetailSuccessState).comments)),
+    // );
     result.fold(
           (failure) => emit(PostDetailFailureState(mapFailureToMessage(failure))),
-          (_) => emit(PostDetailSuccessState(event.post, (state as PostDetailSuccessState).comments)),
+          (_) {
+        if (currentState is PostDetailSuccessState) {
+          final updatedComments = List<PostEntity>.from(currentState.comments)..add(event.comment);
+          emit(PostDetailSuccessState(event.post, updatedComments));
+          postBloc.add(UpdatePostCommentCountEvent(event.post.id, event.comment.id));
+        }
+      },
     );
   }
 
