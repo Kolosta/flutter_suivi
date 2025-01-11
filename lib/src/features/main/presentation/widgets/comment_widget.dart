@@ -131,6 +131,7 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../data/models/delete_post_model.dart';
 import '../../domain/entities/post_entity.dart';
 import '../bloc/detail/detail_bloc.dart';
+import '../bloc/main/post_bloc.dart';
 import '../pages/write_comment_page.dart';
 import 'post_images_widget.dart';
 
@@ -138,8 +139,9 @@ class CommentWidget extends StatelessWidget {
   final PostEntity comment;
   final String userId;
   final PostDetailBloc postDetailBloc;
+  final PostBloc postBloc;
 
-  const CommentWidget({super.key, required this.comment, required this.userId, required this.postDetailBloc});
+  const CommentWidget({super.key, required this.comment, required this.userId, required this.postDetailBloc, required this.postBloc});
 
   void _openAddCommentPage(BuildContext context) {
     Navigator.of(context).push(
@@ -150,6 +152,7 @@ class CommentWidget extends StatelessWidget {
             user: UserEntity(userId: userId),
             post: comment,
             postDetailBloc: postDetailBloc,
+            postBloc: postBloc,
           ),
         ),
       ),
@@ -173,7 +176,7 @@ class CommentWidget extends StatelessWidget {
             TextButton(
               onPressed: () {
                 final deletePostModel = DeletePostModel(id: comment.id, isComment: comment.isComment);
-                postDetailBloc.add(DeletePostEvent(deletePostModel));
+                postDetailBloc.add(DeleteCommentEvent(deletePostModel, postBloc));
                 Navigator.of(context).pop();
                 if (!comment.isComment) {
                   Navigator.of(context).pop();

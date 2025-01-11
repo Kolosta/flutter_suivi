@@ -32,6 +32,7 @@ class PostWidget extends StatelessWidget {
               builder: (context) => PostDetailPage(
                 post: post,
                 userId: userId,
+                postBloc: postBloc,
                 // postBloc: postBloc,
                 // postBloc: postBloc,
               ),

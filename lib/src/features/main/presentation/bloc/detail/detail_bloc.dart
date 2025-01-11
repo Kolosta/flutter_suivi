@@ -21,20 +21,20 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
   final ToggleLikeUsecase toggleLikeUsecase;
   final AddCommentUseCase addCommentUseCase;
   final DeletePostUseCase deletePostUseCase;
-  final PostBloc postBloc;
+  // final PostBloc postBloc;
 
   PostDetailBloc(
       this.getCommentsUseCase,
       this.toggleLikeUsecase,
       this.addCommentUseCase,
       this.deletePostUseCase,
-      this.postBloc
+      // this.postBloc
   )
       : super(PostDetailInitialState()) {
     on<LoadPostDetailEvent>(_loadPostDetail);
     on<ToggleLikeOnPostEvent>(_toggleLikeOnPost);
     on<AddCommentEvent>(_addComment);
-    on<DeletePostEvent>(_deletePost);
+    on<DeleteCommentEvent>(_deleteComment);
   }
 
   Future<void> _loadPostDetail(LoadPostDetailEvent event, Emitter<PostDetailState> emit) async {
@@ -48,13 +48,13 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
     );
   }
 
-  Future<void> _deletePost(DeletePostEvent event, Emitter<PostDetailState> emit) async {
+  Future<void> _deleteComment(DeleteCommentEvent event, Emitter<PostDetailState> emit) async {
     // Émettre une mise à jour optimiste
     final currentState = state;
     if (currentState is PostDetailSuccessState) {
       final updatedPosts = currentState.comments.where((post) => post.id != event.postModel.id).toList();
       emit(PostDetailSuccessState(currentState.activePost, updatedPosts));
-      postBloc.add(RemovePostCommentIdEvent(currentState.activePost.id, event.postModel.id));
+      event.postBloc.add(RemovePostCommentIdEvent(currentState.activePost.id, event.postModel.id));
     }
 
     final result = await deletePostUseCase.call(event.postModel);
@@ -128,7 +128,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
         if (currentState is PostDetailSuccessState) {
           final updatedComments = List<PostEntity>.from(currentState.comments)..add(event.comment);
           emit(PostDetailSuccessState(event.post, updatedComments));
-          postBloc.add(UpdatePostCommentCountEvent(event.post.id, event.comment.id));
+          event.postBloc.add(UpdatePostCommentCountEvent(event.post.id, event.comment.id));
         }
       },
     );

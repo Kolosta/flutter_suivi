@@ -17,10 +17,11 @@ class LoadPostDetailEvent extends PostDetailEvent {
   List<Object> get props => [postId, post];
 }
 
-class DeletePostEvent extends PostDetailEvent {
+class DeleteCommentEvent extends PostDetailEvent {
   final DeletePostModel postModel;
+  final PostBloc postBloc;
 
-  const DeletePostEvent(this.postModel);
+  const DeleteCommentEvent(this.postModel, this.postBloc);
 
   @override
   List<Object> get props => [postModel];
@@ -39,8 +40,9 @@ class ToggleLikeOnPostEvent extends PostDetailEvent {
 class AddCommentEvent extends PostDetailEvent {
   final PostEntity post;
   final PostEntity comment;
+  final PostBloc postBloc;
 
-  const AddCommentEvent(this.post, this.comment);
+  const AddCommentEvent(this.post, this.comment, this.postBloc);
 
   @override
   List<Object> get props => [post, comment];

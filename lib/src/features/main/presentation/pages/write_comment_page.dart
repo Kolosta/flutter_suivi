@@ -13,8 +13,9 @@ class WriteCommentPage extends StatefulWidget {
   final UserEntity user;
   final PostEntity post;
   final PostDetailBloc postDetailBloc;
+  final PostBloc postBloc;
 
-  const WriteCommentPage({super.key, required this.user, required this.post, required this.postDetailBloc});
+  const WriteCommentPage({super.key, required this.user, required this.post, required this.postDetailBloc, required this.postBloc});
 
   @override
   _WriteCommentPageState createState() => _WriteCommentPageState();
@@ -141,7 +142,7 @@ class _WriteCommentPageState extends State<WriteCommentPage> {
                   commentIds: const [],
                 );
                 // context.read<PostBloc>().add(AddCommentEvent(widget.post, newComment));
-                widget.postDetailBloc.add(AddCommentEvent(widget.post, newComment));
+                widget.postDetailBloc.add(AddCommentEvent(widget.post, newComment, widget.postBloc));
                 Navigator.of(context).pop();
               },
             ),

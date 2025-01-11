@@ -36,7 +36,6 @@ class PostDependency{
           getIt<ToggleLikeUsecase>(),
           getIt<AddCommentUseCase>(),
           getIt<DeletePostUseCase>(),
-          getIt<PostBloc>(),
       ),
     );
 
