@@ -158,6 +158,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:tp1_flutter/src/features/main/presentation/pages/write_post_page.dart';
 
 import '../../../../configs/injector/injector_conf.dart';
+import '../../../../core/utils/base_64_to_file.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../routes/app_route_path.dart';
 import '../../../auth/domain/entities/user_entity.dart';
@@ -200,13 +201,13 @@ class _MainPageState extends State<MainPage> {
   }
 
 
-  Future<File> _base64ToFile(String base64Str) async {
-    final bytes = base64Decode(base64Str);
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/temp_image.png');
-    await file.writeAsBytes(bytes);
-    return file;
-  }
+  // Future<File> _base64ToFile(String base64Str) async {
+  //   final bytes = base64Decode(base64Str);
+  //   final dir = await getTemporaryDirectory();
+  //   final file = File('${dir.path}/temp_image.png');
+  //   await file.writeAsBytes(bytes);
+  //   return file;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +238,7 @@ class _MainPageState extends State<MainPage> {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: FutureBuilder<File>(
-                        future: _base64ToFile(state.data.profileImage!),
+                        future: base64ToFile(state.data.profileImage!, 'profile_image_${state.data.userId}.png'),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.done && snapshot.hasData) {

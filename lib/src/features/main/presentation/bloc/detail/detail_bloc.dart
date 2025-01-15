@@ -9,6 +9,7 @@ import '../../../data/models/toggle_like_model.dart';
 import '../../../domain/entities/post_entity.dart';
 import '../../../domain/usecases/add_comment_usecase.dart';
 import '../../../domain/usecases/delete_post_usecase.dart';
+import '../../../domain/usecases/fetch_user_details_usecase.dart';
 import '../../../domain/usecases/toggle_like_usecase.dart';
 import '../main/post_bloc.dart';
 
@@ -21,6 +22,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
   final ToggleLikeUsecase toggleLikeUsecase;
   final AddCommentUseCase addCommentUseCase;
   final DeletePostUseCase deletePostUseCase;
+  final FetchUserDetailsUseCase fetchUserDetailUseCase;
   // final PostBloc postBloc;
 
   PostDetailBloc(
@@ -28,6 +30,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
       this.toggleLikeUsecase,
       this.addCommentUseCase,
       this.deletePostUseCase,
+      this.fetchUserDetailUseCase,
       // this.postBloc
   )
       : super(PostDetailInitialState()) {
@@ -35,6 +38,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
     on<ToggleLikeOnPostEvent>(_toggleLikeOnPost);
     on<AddCommentEvent>(_addComment);
     on<DeleteCommentEvent>(_deleteComment);
+    on<FetchDetailPostUserDetailsEvent>(_onFetchDetailPostUserDetails);
   }
 
   // Future<void> _loadPostDetail(LoadPostDetailEvent event, Emitter<PostDetailState> emit) async {
@@ -144,5 +148,36 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
     );
   }
 
+  Future<void> _onFetchDetailPostUserDetails(FetchDetailPostUserDetailsEvent event, Emitter<PostDetailState> emit) async {
+    final currentState = state;
+
+    if (currentState is PostDetailSuccessState) {
+      final post = currentState.comments.firstWhere((post) => post.id == event.postId);
+
+      if (post.owner != null && post.owner!.username == null) {
+        final result = await fetchUserDetailUseCase.call(post.owner!.userId);
+
+        result.fold(
+          (failure) => emit(PostDetailFailureState(mapFailureToMessage(failure))),
+          (user) {
+            final updatedOwner = post.owner!.copyWith(
+              username: user.username,
+              email: user.email,
+              profileImage: user.profileImage,
+            );
+
+            final updatedComments = currentState.comments.map((p) {
+              if (p.id == post.id) {
+                return p.copyWith(owner: updatedOwner);
+              }
+              return p;
+            }).toList();
+
+            emit(PostDetailSuccessState(currentState.activePostId, updatedComments));
+          },
+        );
+      }
+    }
+  }
 
 }

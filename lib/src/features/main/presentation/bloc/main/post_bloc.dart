@@ -51,7 +51,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<LoadCommentsEvent>(_loadComments);
     on<UpdatePostCommentCountEvent>(_updatePostCommentCount);
     on<RemovePostCommentIdEvent>(_removePostCommentId);
-    on<FetchUserDetailsEvent>(_onFetchUserDetails);
+    on<FetchPostUserDetailsEvent>(_onFetchPostUserDetails);
   }
 
   @override
@@ -253,27 +253,38 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   //     },
   //   );
   // }
-  Future<void> _onFetchUserDetails(FetchUserDetailsEvent event, Emitter<PostState> emit) async {
-    final result = await fetchUserDetailUseCase.call(event.owner.userId);
-    result.fold(
-          (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
-          (user) {
-        final updatedOwner = event.owner.copyWith(
-          username: user.username,
-          email: user.email,
-          profileImage: user.profileImage,
-        );
+  Future<void> _onFetchPostUserDetails(FetchPostUserDetailsEvent event, Emitter<PostState> emit) async {
+    final currentState = state;
 
-        if (state is PostSuccessState) {
-          final updatedPosts = (state as PostSuccessState).data.map((post) {
-            if (post.owner?.userId == updatedOwner.userId) {
-              return post.copyWith(owner: updatedOwner);
-            }
-            return post;
-          }).toList();
-          emit(PostSuccessState(updatedPosts));
-        }
-      },
-    );
+    if (currentState is PostSuccessState) {
+      final post = currentState.data.firstWhere((post) => post.id == event.postId);
+      // logger.f('Fetching user details for post: ${post.id} ${post.content} ${post.owner}');
+      // logger.t("Nombre de messages sur le post : ${post.commentIds}");
+      if (post.owner != null && post.owner!.username == null) {
+        final result = await fetchUserDetailUseCase.call(post.owner!.userId);
+
+        result.fold(
+              (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
+              (user) {
+            // logger.f('User details fetched : ${post.id} ${user.username} ${user.email} ${user.profileImage}');
+            // logger.f('Old user details fetched : ${post.id} ${post.owner?.username} ${post.owner?.email} ${post.owner?.profileImage}');
+            final updatedOwner = post.owner!.copyWith(
+              username: user.username,
+              email: user.email,
+              profileImage: user.profileImage,
+            );
+
+            final updatedPosts = currentState.data.map((p) {
+              if (p.id == post.id) {
+                return p.copyWith(owner: updatedOwner);
+              }
+              return p;
+            }).toList();
+
+            emit(PostSuccessState(updatedPosts));
+          },
+        );
+      }
+    }
   }
 }

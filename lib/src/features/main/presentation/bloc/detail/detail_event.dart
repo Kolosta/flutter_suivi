@@ -56,3 +56,11 @@ class AddCommentEvent extends PostDetailEvent {
   List<Object> get props => [post, comment];
 }
 
+class FetchDetailPostUserDetailsEvent extends PostDetailEvent {
+  final String postId;
+
+  const FetchDetailPostUserDetailsEvent(this.postId);
+
+  @override
+  List<Object> get props => [postId];
+}

@@ -49,7 +49,7 @@ class PostEntity extends Equatable {
       imagePaths: imagePaths ?? this.imagePaths,
       imageUrls: imageUrls ?? this.imageUrls,
       likes: likes ?? this.likes,
-      commentIds: commentIds ?? commentIds,
+      commentIds: commentIds ?? this.commentIds,
       isComment: isComment ?? this.isComment,
       username: username ?? this.username,
       profileImage: profileImage ?? this.profileImage,

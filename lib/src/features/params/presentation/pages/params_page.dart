@@ -130,6 +130,7 @@ class _ParamsPageState extends State<ParamsPage> {
     final currentLanguageCode = context.locale.languageCode;
     final targetLanguageCode = currentLanguageCode == "fr" ? "en" : "fr";
     final targetLanguageLabel = targetLanguageCode == "fr" ? "Français" : "English";
+    final currentLanguageLabel = currentLanguageCode == "fr" ? "Français" : "English";
 
     return MultiBlocProvider(
       providers: [
@@ -181,7 +182,7 @@ class _ParamsPageState extends State<ParamsPage> {
                   _buildRow(
                     context,
                     "language".tr(),
-                    targetLanguageLabel,
+                    currentLanguageLabel,
                     () {
                       _changeLanguage(context, currentLanguageCode);
                     },

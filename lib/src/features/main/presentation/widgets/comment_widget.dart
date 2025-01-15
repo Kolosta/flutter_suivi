@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/base_64_to_file.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../data/models/delete_post_model.dart';
 import '../../domain/entities/post_entity.dart';
@@ -33,6 +37,7 @@ class CommentWidget extends StatelessWidget {
     );
   }
 
+
   void _confirmDeletion(BuildContext context) {
     showDialog(
       context: context,
@@ -64,8 +69,11 @@ class CommentWidget extends StatelessWidget {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
+    postDetailBloc.add(FetchDetailPostUserDetailsEvent(comment.id));
+
     return BlocListener<PostDetailBloc, PostDetailState>(
       listener: (context, state) {
         if (state is PostDetailFailureState) {
@@ -82,6 +90,38 @@ class CommentWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              BlocBuilder<PostBloc, PostState>(
+                builder: (context, state) {
+                  final user = comment.owner;
+                  return Row(
+                    children: [
+                      FutureBuilder<File>(
+                        key: ValueKey(user?.userId),
+                        future: user?.profileImage != null ? base64ToFile(user!.profileImage!, 'profile_image_${user.userId}.png') : null,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                            return CircleAvatar(
+                              radius: 20,
+                              backgroundImage: FileImage(snapshot.data!),
+                            );
+                          } else {
+                            return const CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.grey,
+                            );
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        user?.username ?? 'Unknown',
+                        style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 8.0),
               PostImagesWidget(
                 imagePaths: comment.imagePaths ?? [],
                 imageUrls: comment.imageUrls ?? [],
@@ -125,3 +165,4 @@ class CommentWidget extends StatelessWidget {
     );
   }
 }
+

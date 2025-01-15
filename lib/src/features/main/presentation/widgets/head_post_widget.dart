@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/base_64_to_file.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../data/models/delete_post_model.dart';
 import '../../domain/entities/post_entity.dart';
@@ -16,7 +19,6 @@ class HeadPostWidget extends StatelessWidget {
   final PostBloc postBloc;
 
   const HeadPostWidget({super.key, required this.post, required this.userId, required this.postBloc, required this.postDetailBloc});
-
 
   void _openAddCommentPage(BuildContext context) {
     Navigator.of(context).push(
@@ -67,9 +69,11 @@ class HeadPostWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<PostBloc, PostState>(
+    postDetailBloc.add(FetchDetailPostUserDetailsEvent(post.id));
+
+    return BlocListener<PostDetailBloc, PostDetailState>(
       listener: (context, state) {
-        if (state is PostFailureState) {
+        if (state is PostDetailFailureState) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Failed to update like: ${state.message}')),
           );
@@ -83,6 +87,38 @@ class HeadPostWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              BlocBuilder<PostDetailBloc, PostDetailState>(
+                builder: (context, state) {
+                  final user = post.owner;
+                  return Row(
+                    children: [
+                      FutureBuilder<File>(
+                        key: ValueKey(user?.userId),
+                        future: user?.profileImage != null ? base64ToFile(user!.profileImage!, 'profile_image_${user.userId}.png') : null,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                            return CircleAvatar(
+                              radius: 20,
+                              backgroundImage: FileImage(snapshot.data!),
+                            );
+                          } else {
+                            return const CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.grey,
+                            );
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        user?.username ?? 'Unknown',
+                        style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 8.0),
               if (!post.isComment)
                 PostImagesWidget(
                   imagePaths: post.imagePaths ?? [],

@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:path_provider/path_provider.dart';
-import '../../../auth/domain/entities/user_entity.dart';
+import '../../../../core/utils/base_64_to_file.dart';
 import '../../domain/entities/post_entity.dart';
 import '../bloc/main/post_bloc.dart';
 import '../pages/post_detail_page.dart';
@@ -18,18 +15,12 @@ class PostWidget extends StatelessWidget {
 
   const PostWidget({super.key, required this.post, required this.userId, required this.postBloc});
 
-  Future<File> _base64ToFile(String base64Str, String fileName) async {
-    final bytes = base64Decode(base64Str);
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/$fileName');
-    await file.writeAsBytes(bytes);
-    return file;
-  }
+
 
   @override
   Widget build(BuildContext context) {
     // Dispatch the event to fetch user details
-    postBloc.add(FetchUserDetailsEvent(post.owner!));
+    postBloc.add(FetchPostUserDetailsEvent(post.id));
 
     return BlocListener<PostBloc, PostState>(
       listener: (context, state) {
@@ -63,21 +54,31 @@ class PostWidget extends StatelessWidget {
                 BlocBuilder<PostBloc, PostState>(
                   builder: (context, state) {
                     final user = post.owner;
-                    return FutureBuilder<File>(
-                      future: user?.profileImage != null ? _base64ToFile(user!.profileImage!, 'profile_image.png') : null,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                          return CircleAvatar(
-                            radius: 20,
-                            backgroundImage: FileImage(snapshot.data!),
-                          );
-                        } else {
-                          return const CircleAvatar(
-                            radius: 20,
-                            backgroundImage: AssetImage('assets/images/default_avatar.jpg'),
-                          );
-                        }
-                      },
+                    return Row(
+                      children: [
+                        FutureBuilder<File>(
+                          key: ValueKey(user?.userId), // Ensure unique key for each user
+                          future: user?.profileImage != null ? base64ToFile(user!.profileImage!, 'profile_image_${user.userId}.png') : null,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                              return CircleAvatar(
+                                radius: 20,
+                                backgroundImage: FileImage(snapshot.data!),
+                              );
+                            } else {
+                              return const CircleAvatar(
+                                radius: 20,
+                                backgroundColor: Colors.grey,
+                              );
+                            }
+                          },
+                        ),
+                        const SizedBox(width: 8.0),
+                        Text(
+                          user?.username ?? 'Unknown',
+                          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -111,7 +112,7 @@ class PostWidget extends StatelessWidget {
                       IconButton(
                         icon: const Icon(Icons.comment, size: 16.0),
                         onPressed: () {
-                          // Do nothing here
+                          // Rien pour le moment... n'importe où sur le widget permet  d'afficher les commentaires
                         },
                       ),
                       const SizedBox(width: 4.0),
