@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:tp1_flutter/src/features/auth/domain/entities/user_entity.dart';
 
 import '../../domain/entities/post_entity.dart';
+import '../../domain/entities/post_user_entity.dart';
 import '../bloc/main/post_bloc.dart';
 
 class WritePostPage extends StatefulWidget {
@@ -127,7 +128,9 @@ class _WritePostPageState extends State<WritePostPage> {
               onPressed: () {
                 final newPost = PostEntity(
                   id: DateTime.now().toString(),
-                  ownerId: widget.user.userId!,
+                  owner: PostUserEntity(
+                    userId: widget.user.userId!,
+                  ),
                   content: _controller.text,
                   imagePaths: _imagePaths,
                   imageUrls: _imageUrls,

@@ -7,6 +7,7 @@ import 'package:tp1_flutter/src/core/utils/logger.dart';
 import '../../../../configs/injector/injector.dart';
 import '../models/delete_post_model.dart';
 import '../models/toggle_like_model.dart';
+import '../../domain/entities/post_user_entity.dart';
 
 sealed class PostRemoteDataSource {
   Future<List<PostModel>> fetchPosts();
@@ -20,6 +21,7 @@ sealed class PostRemoteDataSource {
   Future<PostModel> getCommentById(String commentId);
   // Future<void> addComment(String postId, String content);
   Future<void> addComment(String postId, PostModel model);
+  Future<PostUserEntity> fetchUserDetails(String ownerId);
 }
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -197,6 +199,27 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         await docRef.update({
           'likes': FieldValue.arrayUnion([model.userId])
         });
+      }
+    } catch (e) {
+      logger.e(e);
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<PostUserEntity> fetchUserDetails(String ownerId) async {
+    try {
+      final response = await ApiUrl.users.doc(ownerId).get();
+      if (response.exists) {
+        final data = response.data()!;
+        return PostUserEntity(
+          userId: ownerId,
+          username: data['username'],
+          email: data['email'],
+          profileImage: data['profileImage'],
+        );
+      } else {
+        throw ServerException();
       }
     } catch (e) {
       logger.e(e);

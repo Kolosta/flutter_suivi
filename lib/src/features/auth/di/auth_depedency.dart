@@ -4,6 +4,7 @@ import '../../../configs/injector/injector_conf.dart';
 import '../data/datasources/auth_local_datasource.dart';
 import '../data/datasources/auth_remote_datasource.dart';
 import '../data/repositories/auth_repository_impl.dart';
+import '../domain/usecases/change_profile_image_usecase.dart';
 import '../domain/usecases/check_signin_status_usecase.dart';
 import '../domain/usecases/login_usecase.dart';
 import '../domain/usecases/logout_usecase.dart';
@@ -16,12 +17,14 @@ class AuthDepedency {
   AuthDepedency._();
 
   static void init() {
+    //Bloc
     getIt.registerFactory(
           () => AuthBloc(
         getIt<AuthLoginUseCase>(),
         getIt<AuthLogoutUseCase>(),
         getIt<AuthRegisterUseCase>(),
         getIt<AuthCheckSignInStatusUseCase>(),
+        getIt<ChangeProfileImageUseCase>(),
       ),
     );
 
@@ -33,6 +36,7 @@ class AuthDepedency {
           () => AuthRegisterFormBloc(),
     );
 
+    //Usecases
     getIt.registerLazySingleton(
           () => AuthLoginUseCase(
         getIt<AuthRepositoryImpl>(),
@@ -58,6 +62,14 @@ class AuthDepedency {
     );
 
     getIt.registerLazySingleton(
+          () => ChangeProfileImageUseCase(
+        getIt<AuthRepositoryImpl>(),
+      ),
+    );
+
+
+    // Repository
+    getIt.registerLazySingleton(
           () => AuthRepositoryImpl(
         getIt<AuthRemoteDataSourceImpl>(),
         getIt<AuthLocalDataSourceImpl>(),
@@ -70,6 +82,7 @@ class AuthDepedency {
           () => AuthRemoteDataSourceImpl(),
     );
 
+    //Datasources
     getIt.registerLazySingleton(
           () => AuthLocalDataSourceImpl(
         getIt<SecureLocalStorage>(),

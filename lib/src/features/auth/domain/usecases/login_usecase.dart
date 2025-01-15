@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
+import '../../../../core/utils/logger.dart';
 import '../entities/user_entity.dart';
 import '../repositories/auth_repository.dart';
 
@@ -22,7 +23,6 @@ class AuthLoginUseCase implements UseCase<UserEntity, Params> {
     }
 
     final result = await _authRepository.login(params);
-
     return result;
   }
 }

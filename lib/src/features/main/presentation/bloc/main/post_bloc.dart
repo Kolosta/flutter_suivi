@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tp1_flutter/src/features/main/domain/usecases/fetch_user_details_usecase.dart';
 import 'package:tp1_flutter/src/features/main/domain/usecases/get_comments_usecase.dart';
 
 import '../../../../../core/usecases/usecase.dart';
@@ -8,6 +9,7 @@ import '../../../../../core/utils/logger.dart';
 import '../../../data/models/delete_post_model.dart';
 import '../../../data/models/toggle_like_model.dart';
 import '../../../domain/entities/post_entity.dart';
+import '../../../domain/entities/post_user_entity.dart';
 import '../../../domain/usecases/add_comment_usecase.dart';
 import '../../../domain/usecases/add_post_usecase.dart';
 import '../../../domain/usecases/delete_post_usecase.dart';
@@ -20,22 +22,24 @@ part 'post_state.dart';
 
 
 class PostBloc extends Bloc<PostEvent, PostState> {
-  final GetPostsUseCase repository;
+  final GetPostsUseCase getPostsUseCase;
   final GetPostsByIdsUseCase getPostsByIdsUseCase;
   final AddPostUseCase addPostUseCase;
   final DeletePostUseCase deletePostUseCase;
   final ToggleLikeUsecase toggleLikeUsecase;
   final GetCommentsUseCase getCommentsUseCase;
   final AddCommentUseCase addCommentUseCase;
+  final FetchUserDetailsUseCase fetchUserDetailUseCase;
 
   PostBloc(
-      this.repository,
+      this.getPostsUseCase,
       this.getPostsByIdsUseCase,
       this.addPostUseCase,
       this.deletePostUseCase,
       this.toggleLikeUsecase,
       this.getCommentsUseCase,
       this.addCommentUseCase,
+      this.fetchUserDetailUseCase,
   ) : super(PostInitialState()){
     on<GetPostsEvent>(_getPosts);
     on<GetPostsByIdsEvent>(_getPostsByIds);
@@ -47,6 +51,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<LoadCommentsEvent>(_loadComments);
     on<UpdatePostCommentCountEvent>(_updatePostCommentCount);
     on<RemovePostCommentIdEvent>(_removePostCommentId);
+    on<FetchUserDetailsEvent>(_onFetchUserDetails);
   }
 
   @override
@@ -59,7 +64,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   Future<void> _getPosts(GetPostsEvent event, Emitter<PostState> emit) async {
     emit(PostLoadingState());
 
-    final result = await repository.call(NoParams());
+    final result = await getPostsUseCase.call(NoParams());
 
     result.fold(
       (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
@@ -162,8 +167,10 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       userId: event.userId,
     );
 
+    // Call the usecase to toggle the like
     final result = await toggleLikeUsecase.call(model);
 
+    // Handle the result
     result.fold(
           (failure) {
         // Revert the optimistic update if the call fails
@@ -225,4 +232,48 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     }
   }
 
+  // Future<void> _onFetchUserDetails(FetchUserDetailsEvent event, Emitter<PostState> emit) async {
+  //   final result = await fetchUserDetailUseCase.call(event.owner);
+  //   result.fold(
+  //         (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
+  //         (user) => emit(UserDetailsFetchedState(user)),
+  //   );
+  // }
+  // Future<void> _onFetchUserDetails(FetchUserDetailsEvent event, Emitter<PostState> emit) async {
+  //   final result = await fetchUserDetailUseCase.call(event.owner.userId);
+  //   result.fold(
+  //         (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
+  //         (user) {
+  //       final updatedOwner = event.owner.copyWith(
+  //         username: user.username,
+  //         email: user.email,
+  //         profileImage: user.profileImage,
+  //       );
+  //       emit(UserDetailsFetchedState(updatedOwner));
+  //     },
+  //   );
+  // }
+  Future<void> _onFetchUserDetails(FetchUserDetailsEvent event, Emitter<PostState> emit) async {
+    final result = await fetchUserDetailUseCase.call(event.owner.userId);
+    result.fold(
+          (failure) => emit(PostFailureState(mapFailureToMessage(failure))),
+          (user) {
+        final updatedOwner = event.owner.copyWith(
+          username: user.username,
+          email: user.email,
+          profileImage: user.profileImage,
+        );
+
+        if (state is PostSuccessState) {
+          final updatedPosts = (state as PostSuccessState).data.map((post) {
+            if (post.owner?.userId == updatedOwner.userId) {
+              return post.copyWith(owner: updatedOwner);
+            }
+            return post;
+          }).toList();
+          emit(PostSuccessState(updatedPosts));
+        }
+      },
+    );
+  }
 }

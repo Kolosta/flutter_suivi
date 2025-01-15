@@ -107,3 +107,12 @@ class RemovePostCommentIdEvent extends PostEvent {
   @override
   List<Object> get props => [postToUpdateId, commentIdToRemove];
 }
+
+class FetchUserDetailsEvent extends PostEvent {
+  final PostUserEntity owner;
+
+  const FetchUserDetailsEvent(this.owner);
+
+  @override
+  List<Object> get props => [owner];
+}

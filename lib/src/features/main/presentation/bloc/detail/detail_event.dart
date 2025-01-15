@@ -7,14 +7,22 @@ abstract class PostDetailEvent extends Equatable {
   List<Object> get props => [];
 }
 
+// class LoadPostDetailEvent extends PostDetailEvent {
+//   final String postId;
+//   final PostEntity post;
+//
+//   const LoadPostDetailEvent(this.postId, this.post);
+//
+//   @override
+//   List<Object> get props => [postId, post];
+// }
 class LoadPostDetailEvent extends PostDetailEvent {
-  final String postId;
-  final PostEntity post;
+  final String activePostId;
 
-  const LoadPostDetailEvent(this.postId, this.post);
+  const LoadPostDetailEvent(this.activePostId);
 
   @override
-  List<Object> get props => [postId, post];
+  List<Object> get props => [activePostId];
 }
 
 class DeleteCommentEvent extends PostDetailEvent {

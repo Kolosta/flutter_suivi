@@ -7,6 +7,7 @@ import 'package:tp1_flutter/src/features/auth/domain/entities/user_entity.dart';
 import 'package:tp1_flutter/src/features/main/presentation/bloc/detail/detail_bloc.dart';
 
 import '../../domain/entities/post_entity.dart';
+import '../../domain/entities/post_user_entity.dart';
 import '../bloc/main/post_bloc.dart';
 
 class WriteCommentPage extends StatefulWidget {
@@ -134,7 +135,9 @@ class _WriteCommentPageState extends State<WriteCommentPage> {
               onPressed: () {
                 final newComment = PostEntity(
                   id: DateTime.now().toString(),
-                  ownerId: widget.user.userId!,
+                  owner: PostUserEntity(
+                    userId: widget.user.userId!,
+                  ),
                   content: _controller.text,
                   imagePaths: _imagePaths,
                   imageUrls: _imageUrls,

@@ -38,3 +38,12 @@ class PostActiveState extends PostState {
   @override
   List<Object> get props => [activePost, comments];
 }
+
+class UserDetailsFetchedState extends PostState {
+  final PostUserEntity user;
+
+  const UserDetailsFetchedState(this.user);
+
+  @override
+  List<Object> get props => [user];
+}

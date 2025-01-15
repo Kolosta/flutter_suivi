@@ -9,6 +9,7 @@ import 'configs/injector/injector_conf.dart';
 import 'core/blocs/theme/theme_bloc.dart';
 import 'core/blocs/translate/translate_bloc.dart';
 import 'core/themes/app_theme.dart';
+import 'core/utils/logger.dart';
 import 'features/auth/presentation/bloc/auth/auth_bloc.dart';
 
 

@@ -14,6 +14,7 @@ class UserAdapter extends TypeAdapter<UserModel> {
       userId: data[0],
       email: data[1],
       username: data[2],
+      profileImage: data[3],
       // password: data[3],
     );
   }
@@ -24,7 +25,8 @@ class UserAdapter extends TypeAdapter<UserModel> {
       obj.userId,
       obj.email,
       obj.username,
-      obj.password,
+      // obj.password,
+      obj.profileImage,
     ]);
   }
 }

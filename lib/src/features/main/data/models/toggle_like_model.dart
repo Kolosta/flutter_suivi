@@ -1,5 +1,7 @@
 import 'package:tp1_flutter/src/features/main/domain/entities/post_entity.dart';
 
+import '../../domain/entities/post_user_entity.dart';
+
 class ToggleLikeModel extends PostEntity {
   final String postId;
   final String userId;
@@ -9,7 +11,7 @@ class ToggleLikeModel extends PostEntity {
     required this.userId,
   }) : super(
           id: postId,
-          ownerId: userId,
+          owner: PostUserEntity(userId: userId),
           content: '',
           imagePaths: [],
           imageUrls: [],

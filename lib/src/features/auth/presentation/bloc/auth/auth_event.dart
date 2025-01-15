@@ -42,3 +42,12 @@ class AuthRegisterEvent extends AuthEvent {
 class AuthLogoutEvent extends AuthEvent {}
 
 class AuthCheckSignInStatusEvent extends AuthEvent {}
+
+class ChangeProfileImageEvent extends AuthEvent {
+  final File imageFile;
+
+  ChangeProfileImageEvent(this.imageFile);
+
+  @override
+  List<Object> get props => [imageFile];
+}

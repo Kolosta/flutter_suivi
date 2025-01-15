@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../configs/injector/injector_conf.dart';
 import '../../../../core/blocs/theme/theme_bloc.dart';
@@ -60,6 +63,19 @@ class _ParamsPageState extends State<ParamsPage> {
     } else {
       context.setLocale(frenchLocale);
       trBloc.add(TrFrenchEvent());
+    }
+  }
+
+  Future<String?> getPhotoURLFromUser() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    return pickedFile?.path;
+  }
+
+  void _changeProfileImage(BuildContext context) async {
+    final photoURL = await getPhotoURLFromUser();
+    if (photoURL != null) {
+      context.read<AuthBloc>().add(ChangeProfileImageEvent(File(photoURL)));
     }
   }
 
@@ -139,6 +155,10 @@ class _ParamsPageState extends State<ParamsPage> {
             } else if (state is AuthLogoutFailureState) {
               context.pop();
               appSnackBar(context, Colors.red, state.message);
+            } else if (state is ChangeProfileImageSuccessState) {
+              appSnackBar(context, Colors.green, "Profile image updated successfully");
+            } else if (state is ChangeProfileImageFailureState) {
+              appSnackBar(context, Colors.red, state.message);
             }
           },
           builder: (context, state) {
@@ -166,6 +186,16 @@ class _ParamsPageState extends State<ParamsPage> {
                       _changeLanguage(context, currentLanguageCode);
                     },
                     Icons.language,
+                    "change".tr(),
+                  ),
+                  _buildRow(
+                    context,
+                    "profile_image".tr(),
+                    widget.user.profileImage ?? "",
+                    () {
+                      _changeProfileImage(context);
+                    },
+                    Icons.image,
                     "change".tr(),
                   ),
                   _buildRow(

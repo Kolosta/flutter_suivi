@@ -8,6 +8,7 @@ import '../../domain/usecases/add_comment_usecase.dart';
 import '../datasources/post_remote_data_source.dart';
 import '../models/delete_post_model.dart';
 import '../models/models.dart';
+import '../../domain/entities/post_user_entity.dart';
 
 class PostRepositoryImpl implements PostRepository {
   final PostRemoteDataSource _remoteDataSource;
@@ -42,7 +43,7 @@ class PostRepositoryImpl implements PostRepository {
     try {
       final postModel = PostModel(
         id: post.id,
-        ownerId: post.ownerId ?? '',
+        owner: post.owner!,
         content: post.content ?? '',
         imagePaths: post.imagePaths ?? [],
         imageUrls: post.imageUrls ?? [],
@@ -110,7 +111,7 @@ class PostRepositoryImpl implements PostRepository {
 
       final postModel = PostModel(
         id: params.comment.id,
-        ownerId: params.comment.ownerId ?? '',
+        owner: params.comment.owner!,
         content: params.comment.content ?? '',
         imagePaths: params.comment.imagePaths ?? [],
         imageUrls: params.comment.imageUrls ?? [],
@@ -132,6 +133,16 @@ class PostRepositoryImpl implements PostRepository {
       await _remoteDataSource.toggleLike(model);
       return const Right(null);
     } on ServerException {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, PostUserEntity>> fetchUserDetails(String ownerId) async {
+    try {
+      final user = await _remoteDataSource.fetchUserDetails(ownerId);
+      return Right(user);
+    } catch (e) {
       return Left(ServerFailure());
     }
   }

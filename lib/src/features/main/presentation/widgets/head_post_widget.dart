@@ -9,13 +9,14 @@ import '../bloc/main/post_bloc.dart';
 import '../pages/write_comment_page.dart';
 import 'post_images_widget.dart';
 
-class CommentWidget extends StatelessWidget {
-  final PostEntity comment;
+class HeadPostWidget extends StatelessWidget {
+  final PostEntity post;
   final String userId;
   final PostDetailBloc postDetailBloc;
   final PostBloc postBloc;
 
-  const CommentWidget({super.key, required this.comment, required this.userId, required this.postDetailBloc, required this.postBloc});
+  const HeadPostWidget({super.key, required this.post, required this.userId, required this.postBloc, required this.postDetailBloc});
+
 
   void _openAddCommentPage(BuildContext context) {
     Navigator.of(context).push(
@@ -24,7 +25,7 @@ class CommentWidget extends StatelessWidget {
           value: postDetailBloc,
           child: WriteCommentPage(
             user: UserEntity(userId: userId),
-            post: comment,
+            post: post,
             postDetailBloc: postDetailBloc,
             postBloc: postBloc,
           ),
@@ -49,10 +50,10 @@ class CommentWidget extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                final deletePostModel = DeletePostModel(id: comment.id, isComment: comment.isComment);
+                final deletePostModel = DeletePostModel(id: post.id, isComment: post.isComment);
                 postDetailBloc.add(DeleteCommentEvent(deletePostModel, postBloc));
                 Navigator.of(context).pop();
-                if (!comment.isComment) {
+                if (!post.isComment) {
                   Navigator.of(context).pop();
                 }
               },
@@ -66,9 +67,9 @@ class CommentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<PostDetailBloc, PostDetailState>(
+    return BlocListener<PostBloc, PostState>(
       listener: (context, state) {
-        if (state is PostDetailFailureState) {
+        if (state is PostFailureState) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Failed to update like: ${state.message}')),
           );
@@ -82,13 +83,14 @@ class CommentWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PostImagesWidget(
-                imagePaths: comment.imagePaths ?? [],
-                imageUrls: comment.imageUrls ?? [],
-              ),
+              if (!post.isComment)
+                PostImagesWidget(
+                  imagePaths: post.imagePaths ?? [],
+                  imageUrls: post.imageUrls ?? [],
+                ),
               const SizedBox(height: 8.0),
               Text(
-                comment.content ?? '',
+                post.content ?? '',
                 style: const TextStyle(fontSize: 16.0),
               ),
               const SizedBox(height: 8.0),
@@ -96,26 +98,37 @@ class CommentWidget extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: Icon(
-                      (comment.likes?.contains(userId) ?? false) ? Icons.thumb_up : Icons.thumb_up_outlined,
+                      (post.likes?.contains(userId) ?? false) ? Icons.thumb_up : Icons.thumb_up_outlined,
                       size: 16.0,
                     ),
                     onPressed: () {
-                      postDetailBloc.add(ToggleLikeOnPostEvent(userId, comment));
+                      postBloc.add(ToggleLikeEvent(post, userId));
                     },
                   ),
                   const SizedBox(width: 4.0),
-                  Text('${comment.likes?.length ?? 0}'),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.delete, size: 16.0),
-                    onPressed: () {
-                      _confirmDeletion(context);
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.reply, size: 16.0),
-                    onPressed: () => _openAddCommentPage(context),
-                  ),
+                  Text('${post.likes?.length ?? 0}'),
+                  if (!post.isComment) ...[
+                    const SizedBox(width: 16.0),
+                    IconButton(
+                      icon: const Icon(Icons.comment, size: 16.0),
+                      onPressed: () {
+                        // Do nothing here
+                      },
+                    ),
+                    const SizedBox(width: 4.0),
+                    Text('${post.commentIds?.length ?? 0}'),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.delete, size: 16.0),
+                      onPressed: () {
+                        _confirmDeletion(context);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.reply, size: 16.0),
+                      onPressed: () => _openAddCommentPage(context),
+                    ),
+                  ],
                 ],
               ),
             ],

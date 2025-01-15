@@ -1,8 +1,9 @@
 import '../../domain/entities/post_entity.dart';
+import '../../domain/entities/post_user_entity.dart';
 
 class PostModel {
   final String id;
-  final String ownerId;
+  final PostUserEntity owner;
   final String content;
   final List<String> imagePaths;
   final List<String> imageUrls;
@@ -12,7 +13,7 @@ class PostModel {
 
   PostModel({
     required this.id,
-    required this.ownerId,
+    required this.owner,
     required this.content,
     required this.imagePaths,
     required this.imageUrls,
@@ -24,7 +25,7 @@ class PostModel {
   factory PostModel.fromJson(Map<String, dynamic> json) {
     return PostModel(
       id: json['id'],
-      ownerId: json['ownerId'],
+      owner: PostUserEntity(userId: json['ownerId']),
       content: json['content'],
       imagePaths: List<String>.from(json['imagePaths']),
       imageUrls: List<String>.from(json['imageUrls']),
@@ -37,7 +38,7 @@ class PostModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'ownerId': ownerId,
+      'ownerId': owner.userId,
       'content': content,
       'imagePaths': imagePaths,
       'imageUrls': imageUrls,
@@ -50,7 +51,7 @@ class PostModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'ownerId': ownerId,
+      'ownerId': owner.userId,
       'content': content,
       'imagePaths': imagePaths,
       'imageUrls': imageUrls,
@@ -62,7 +63,7 @@ class PostModel {
 
   PostModel copyWith({
     String? id,
-    String? ownerId,
+    PostUserEntity? owner,
     String? content,
     List<String>? imagePaths,
     List<String>? imageUrls,
@@ -72,7 +73,7 @@ class PostModel {
   }) {
     return PostModel(
       id: id ?? this.id,
-      ownerId: ownerId ?? this.ownerId,
+      owner: owner ?? this.owner,
       content: content ?? this.content,
       imagePaths: imagePaths ?? this.imagePaths,
       imageUrls: imageUrls ?? this.imageUrls,
@@ -85,7 +86,7 @@ class PostModel {
   static PostModel fromEntity(PostEntity entity) {
     return PostModel(
       id: entity.id,
-      ownerId: entity.ownerId ?? '',
+      owner: entity.owner ?? PostUserEntity(userId: ''),
       content: entity.content ?? '',
       imagePaths: entity.imagePaths ?? [],
       imageUrls: entity.imageUrls ?? [],
@@ -98,7 +99,7 @@ class PostModel {
   PostEntity toEntity() {
     return PostEntity(
       id: id,
-      ownerId: ownerId,
+      owner: owner,
       content: content,
       imagePaths: imagePaths,
       imageUrls: imageUrls,

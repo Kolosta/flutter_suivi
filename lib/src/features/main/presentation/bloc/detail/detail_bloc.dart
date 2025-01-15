@@ -37,14 +37,24 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
     on<DeleteCommentEvent>(_deleteComment);
   }
 
+  // Future<void> _loadPostDetail(LoadPostDetailEvent event, Emitter<PostDetailState> emit) async {
+  //   emit(PostDetailLoadingState());
+  //
+  //   final result = await getCommentsUseCase.call(event.postId);
+  //
+  //   result.fold(
+  //         (failure) => emit(PostDetailFailureState(mapFailureToMessage(failure))),
+  //         (comments) => emit(PostDetailSuccessState(event.post, comments)),
+  //   );
+  // }
   Future<void> _loadPostDetail(LoadPostDetailEvent event, Emitter<PostDetailState> emit) async {
     emit(PostDetailLoadingState());
 
-    final result = await getCommentsUseCase.call(event.postId);
+    final result = await getCommentsUseCase.call(event.activePostId);
 
     result.fold(
-          (failure) => emit(PostDetailFailureState(mapFailureToMessage(failure))),
-          (comments) => emit(PostDetailSuccessState(event.post, comments)),
+      (failure) => emit(PostDetailFailureState(mapFailureToMessage(failure))),
+      (comments) => emit(PostDetailSuccessState(event.activePostId, comments)),
     );
   }
 
@@ -53,8 +63,8 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
     final currentState = state;
     if (currentState is PostDetailSuccessState) {
       final updatedPosts = currentState.comments.where((post) => post.id != event.postModel.id).toList();
-      emit(PostDetailSuccessState(currentState.activePost, updatedPosts));
-      event.postBloc.add(RemovePostCommentIdEvent(currentState.activePost.id, event.postModel.id));
+      emit(PostDetailSuccessState(currentState.activePostId, updatedPosts));
+      event.postBloc.add(RemovePostCommentIdEvent(currentState.activePostId, event.postModel.id));
     }
 
     final result = await deletePostUseCase.call(event.postModel);
@@ -80,7 +90,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
 
     // Emit an optimistic update
     emit(PostDetailSuccessState(
-      (state as PostDetailSuccessState).activePost,
+      (state as PostDetailSuccessState).activePostId,
       (state as PostDetailSuccessState).comments.map((post) {
         return post.id == event.post.id ? updatedPost : post;
       }).toList(),
@@ -98,7 +108,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
           // Revert the optimistic update if the call fails
               emit(PostDetailFailureState(mapFailureToMessage(failure)));
               emit(PostDetailSuccessState(
-                (state as PostDetailSuccessState).activePost,
+                (state as PostDetailSuccessState).activePostId,
                 (state as PostDetailSuccessState).comments.map((post) {
                   return post.id == event.post.id ? event.post : post;
                 }).toList(),
@@ -127,7 +137,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
           (_) {
         if (currentState is PostDetailSuccessState) {
           final updatedComments = List<PostEntity>.from(currentState.comments)..add(event.comment);
-          emit(PostDetailSuccessState(event.post, updatedComments));
+          emit(PostDetailSuccessState(event.post.id, updatedComments));
           event.postBloc.add(UpdatePostCommentCountEvent(event.post.id, event.comment.id));
         }
       },

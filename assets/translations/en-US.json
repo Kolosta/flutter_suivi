@@ -53,6 +53,6 @@
   "delete": "Delete",
   "cancel": "Cancel",
   "delete_comment": "Delete comment",
-  "confirm_comment_deletion": "Are you sure want to delete this comment?"
-
+  "confirm_comment_deletion": "Are you sure want to delete this comment?",
+  "unknown_pseudo": "Unknown pseudo"
 }

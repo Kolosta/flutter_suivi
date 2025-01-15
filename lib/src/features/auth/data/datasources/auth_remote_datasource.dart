@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import '../../../../core/api/api_url.dart';
 import '../../../../core/constants/error_message.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -13,6 +16,7 @@ sealed class AuthRemoteDataSource {
   Future<UserModel> login(LoginModel model);
   Future<void> logout();
   Future<void> register(RegisterModel model);
+  Future<String> uploadProfileImage(File imageFile);
 }
 
 
@@ -81,9 +85,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final doc = await ApiUrl.users.doc(uid).get();
       if (!doc.exists) throw EmptyException();
-      return UserModel.fromJson(doc.data()!, uid);
+
+      UserModel result = UserModel.fromJson(doc.data()!, uid);
+      return result;
     } catch (e) {
       if (e is EmptyException) throw EmptyException();
+      logger.e(e);
+      throw ServerException();
+    }
+  }
+
+  @override
+  Future<String> uploadProfileImage(File imageFile) async {
+    try {
+      final bytes = await imageFile.readAsBytes();
+      final base64Image = base64Encode(bytes);
+      final user = _firebaseAuth.currentUser;
+
+      if (user != null) {
+        await ApiUrl.users.doc(user.uid).update({'profileImage': base64Image});
+        return base64Image;
+      } else {
+        throw AuthException();
+      }
+    } catch (e) {
       logger.e(e);
       throw ServerException();
     }

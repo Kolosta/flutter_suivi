@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../configs/injector/injector_conf.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../domain/entities/post_entity.dart';
 import '../bloc/main/post_bloc.dart';
@@ -14,8 +18,19 @@ class PostWidget extends StatelessWidget {
 
   const PostWidget({super.key, required this.post, required this.userId, required this.postBloc});
 
+  Future<File> _base64ToFile(String base64Str, String fileName) async {
+    final bytes = base64Decode(base64Str);
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/$fileName');
+    await file.writeAsBytes(bytes);
+    return file;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Dispatch the event to fetch user details
+    postBloc.add(FetchUserDetailsEvent(post.owner!));
+
     return BlocListener<PostBloc, PostState>(
       listener: (context, state) {
         if (state is PostFailureState) {
@@ -30,11 +45,9 @@ class PostWidget extends StatelessWidget {
             context,
             MaterialPageRoute(
               builder: (context) => PostDetailPage(
-                post: post,
+                postId: post.id,
                 userId: userId,
                 postBloc: postBloc,
-                // postBloc: postBloc,
-                // postBloc: postBloc,
               ),
             ),
           );
@@ -47,6 +60,28 @@ class PostWidget extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                BlocBuilder<PostBloc, PostState>(
+                  builder: (context, state) {
+                    final user = post.owner;
+                    return FutureBuilder<File>(
+                      future: user?.profileImage != null ? _base64ToFile(user!.profileImage!, 'profile_image.png') : null,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                          return CircleAvatar(
+                            radius: 20,
+                            backgroundImage: FileImage(snapshot.data!),
+                          );
+                        } else {
+                          return const CircleAvatar(
+                            radius: 20,
+                            backgroundImage: AssetImage('assets/images/default_avatar.jpg'),
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: 8.0),
                 if (!post.isComment)
                   PostImagesWidget(
                     imagePaths: post.imagePaths ?? [],
@@ -66,7 +101,6 @@ class PostWidget extends StatelessWidget {
                         size: 16.0,
                       ),
                       onPressed: () {
-                        // context.read<PostBloc>().add(ToggleLikeEvent(post, userId));
                         postBloc.add(ToggleLikeEvent(post, userId));
                       },
                     ),

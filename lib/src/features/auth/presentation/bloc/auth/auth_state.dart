@@ -87,3 +87,24 @@ class AuthCheckSignInStatusFailureState extends AuthState {
   @override
   List<Object?> get props => [message];
 }
+
+
+class ChangeProfileImageLoadingState extends AuthState {}
+
+class ChangeProfileImageSuccessState extends AuthState {
+  final String imageUrl;
+
+  ChangeProfileImageSuccessState(this.imageUrl);
+
+  @override
+  List<Object> get props => [imageUrl];
+}
+
+class ChangeProfileImageFailureState extends AuthState {
+  final String message;
+
+  ChangeProfileImageFailureState(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

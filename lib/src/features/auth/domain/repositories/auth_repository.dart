@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failures.dart';
@@ -9,4 +11,5 @@ abstract class AuthRepository {
   Future<Either<Failure, void>> logout();
   Future<Either<Failure, void>> register(RegisterParams params);
   Future<Either<Failure, UserEntity>> checkSignInStatus();
+  Future<Either<Failure, String>> changeProfileImage(File imageFile);
 }

@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/cache/hive_local_storage.dart';
 import '../../../../core/cache/secure_local_storage.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/utils/logger.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/usecase_params.dart';
@@ -88,6 +91,16 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(result);
     } on CacheException {
       return Left(CacheFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> changeProfileImage(File imageFile) async {
+    try {
+      final imageUrl = await _authRemoteDataSource.uploadProfileImage(imageFile);
+      return Right(imageUrl);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
     }
   }
 }

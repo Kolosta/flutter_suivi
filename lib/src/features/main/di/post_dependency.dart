@@ -9,6 +9,7 @@ import '../data/datasources/post_remote_data_source.dart';
 import '../data/repositories/post_repository_impl.dart';
 import '../domain/usecases/add_comment_usecase.dart';
 import '../domain/usecases/add_post_usecase.dart';
+import '../domain/usecases/fetch_user_details_usecase.dart';
 import '../domain/usecases/get_comments_usecase.dart';
 import '../domain/usecases/get_posts_by_ids_usecase.dart';
 import '../presentation/bloc/detail/detail_bloc.dart';
@@ -27,6 +28,7 @@ class PostDependency{
           getIt<ToggleLikeUsecase>(),
           getIt<GetCommentsUseCase>(),
           getIt<AddCommentUseCase>(),
+          getIt<FetchUserDetailsUseCase>(),
           // getIt<RemovePostCommentIdEvent>(),
       ),
     );
@@ -72,6 +74,11 @@ class PostDependency{
     );
     getIt.registerLazySingleton(
       () => AddCommentUseCase(
+          getIt<PostRepositoryImpl>(),
+      ),
+    );
+    getIt.registerLazySingleton(
+      () => FetchUserDetailsUseCase(
           getIt<PostRepositoryImpl>(),
       ),
     );
