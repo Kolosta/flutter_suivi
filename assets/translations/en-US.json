@@ -54,5 +54,6 @@
   "cancel": "Cancel",
   "delete_comment": "Delete comment",
   "confirm_comment_deletion": "Are you sure want to delete this comment?",
-  "unknown_pseudo": "Unknown pseudo"
+  "unknown_pseudo": "Unknown pseudo",
+  "profile_image": "Profile image",
 }
