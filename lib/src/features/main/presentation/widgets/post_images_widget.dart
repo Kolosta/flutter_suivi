@@ -22,7 +22,7 @@ class PostImagesWidget extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
+        // border: Border.all(color: Colors.grey, width: 0.5),
         borderRadius: BorderRadius.circular(12.0),
       ),
       child: ClipRRect(

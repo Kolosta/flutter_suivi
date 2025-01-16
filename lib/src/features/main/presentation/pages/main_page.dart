@@ -249,8 +249,7 @@ class _MainPageState extends State<MainPage> {
                           } else {
                             return const CircleAvatar(
                               radius: 20,
-                              backgroundImage: AssetImage(
-                                  'assets/images/default_avatar.jpg'),
+                              backgroundImage: AssetImage('assets/images/default_avatar.jpg'),
                             );
                           }
                         },
@@ -268,21 +267,23 @@ class _MainPageState extends State<MainPage> {
             if (state is PostLoadingState) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is PostSuccessState) {
+              if (state.data.isEmpty) {
+                return const Center(child: Text("No posts available"));
+              }
               return ListView.builder(
-                itemCount: state.data.length + 1,
-                //+1 pour ajouter un espace à la fin
+                itemCount: state.data.length + 1, // +1 to add space at the end
                 itemBuilder: (context, index) {
                   if (index == state.data.length) {
                     return const SizedBox(height: 80);
                   }
                   final post = state.data[index];
                   return Container(
-                      margin: const EdgeInsets.only(bottom: 4.0),
-                      child: PostWidget(
-                        post: post,
-                        userId: widget.user.userId!,
-                        postBloc: _postBloc,
-                      )
+                    margin: const EdgeInsets.only(bottom: 4.0),
+                    child: PostWidget(
+                      post: post,
+                      userId: widget.user.userId!,
+                      postBloc: _postBloc,
+                    ),
                   );
                 },
               );
